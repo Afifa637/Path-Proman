@@ -1,0 +1,105 @@
+# Bangla curriculum synonym classes — PLAN.md task T6b (Tier A: hand-authored).
+#
+# Tier A cannot induce these from FastText neighbours, so they are written by
+# hand for the curriculum terms that actually matter.  Tier B (X3) adds
+# distributionally-induced candidates on top, and reports the precision of BOTH
+# against the same probe set — which turns "does distributional induction beat a
+# hand list?" into a measured question instead of an assumption.
+#
+# Columns:  term <TAB> synonym <TAB> reviewed <TAB> domain
+# `reviewed=1` means a human checked the pair.  Unreviewed pairs are flagged and
+# EXCLUDED from headline metrics (PLAN.md §7.4) — embedding neighbourhoods put
+# antonyms and co-hyponyms close together, so an unvetted list quietly turns
+# tier-3 F1 into nonsense.
+#
+# Symmetry is implied: the loader closes each class under symmetry+transitivity.
+
+# ---- science: matter and energy -----------------------------------------
+বায়ুমণ্ডল	আবহমণ্ডল	1	science
+বায়ু	বাতাস	1	science
+অক্সিজেন	অম্লজান	1	science
+হাইড্রোজেন	উদজান	1	science
+নাইট্রোজেন	যবক্ষারজান	1	science
+কার্বন ডাই-অক্সাইড	অঙ্গারাম্ল	1	science
+তাপমাত্রা	উষ্ণতা	1	science
+শক্তি	ক্ষমতা	0	science
+গতি	বেগ	0	science
+ভর	ওজন	0	science
+পদার্থ	বস্তু	1	science
+কঠিন	জমাট	0	science
+তরল	জলীয়	0	science
+বায়বীয়	গ্যাসীয়	1	science
+পরমাণু	এটম	1	science
+অণু	মলিকিউল	1	science
+মৌল	মৌলিক পদার্থ	1	science
+যৌগ	যৌগিক পদার্থ	1	science
+দ্রবণ	সলিউশন	1	science
+পরিবাহী	সুপরিবাহী	0	science
+
+# ---- science: life ------------------------------------------------------
+সালোকসংশ্লেষণ	ফটোসিনথেসিস	1	biology
+শ্বসন	রেসপিরেশন	1	biology
+প্রস্বেদন	ট্রান্সপিরেশন	1	biology
+কোষ	সেল	1	biology
+কোষপ্রাচীর	কোষ প্রাচীর	1	biology
+ক্লোরোফিল	পত্রহরিৎ	1	biology
+উদ্ভিদ	গাছ	0	biology
+প্রাণী	জীবজন্তু	1	biology
+জীব	প্রাণ	0	biology
+খাদ্য	আহার	1	biology
+পুষ্টি	পরিপোষণ	1	biology
+রক্ত	শোণিত	1	biology
+হৃৎপিণ্ড	হৃদযন্ত্র	1	biology
+ফুসফুস	ফুসফুস	1	biology
+স্নায়ু	নার্ভ	1	biology
+বংশগতি	বংশানুক্রম	1	biology
+প্রজনন	বংশবৃদ্ধি	1	biology
+পরিবেশ	পারিপার্শ্বিক	0	biology
+
+# ---- process / method words ---------------------------------------------
+প্রক্রিয়া	পদ্ধতি	1	general
+পদ্ধতি	উপায়	0	general
+কারণ	হেতু	1	general
+ফলাফল	পরিণতি	1	general
+বৈশিষ্ট্য	ধর্ম	0	general
+গুরুত্ব	প্রয়োজনীয়তা	1	general
+সংজ্ঞা	পরিচিতি	0	general
+উদাহরণ	দৃষ্টান্ত	1	general
+পার্থক্য	তফাত	1	general
+ব্যবহার	প্রয়োগ	1	general
+উৎপাদন	তৈরি	0	general
+পরিমাণ	মাত্রা	0	general
+প্রভাব	ক্রিয়া	0	general
+
+# ---- social studies / history -------------------------------------------
+মুক্তিযুদ্ধ	স্বাধীনতা যুদ্ধ	1	history
+স্বাধীনতা	স্বায়ত্তশাসন	0	history
+সংবিধান	শাসনতন্ত্র	1	civics
+গণতন্ত্র	জনতন্ত্র	1	civics
+নাগরিক	প্রজা	0	civics
+রাষ্ট্র	দেশ	0	civics
+সরকার	শাসনব্যবস্থা	0	civics
+অধিকার	হক	1	civics
+কর্তব্য	দায়িত্ব	1	civics
+জনসংখ্যা	লোকসংখ্যা	1	geography
+জলবায়ু	আবহাওয়া	0	geography
+নদী	স্রোতস্বিনী	1	geography
+কৃষি	চাষাবাদ	1	geography
+শিল্প	কারখানা	0	geography
+অর্থনীতি	অর্থব্যবস্থা	1	economics
+
+# ---- mathematics --------------------------------------------------------
+যোগ	সংকলন	1	math
+বিয়োগ	বিয়োজন	1	math
+গুণ	গুণন	1	math
+ভাগ	বিভাজন	1	math
+সংখ্যা	রাশি	0	math
+ভগ্নাংশ	ফ্র্যাকশন	1	math
+ক্ষেত্রফল	এরিয়া	1	math
+পরিসীমা	পরিধি	0	math
+আয়তন	ভলিউম	1	math
+সমীকরণ	ইকুয়েশন	1	math
+ত্রিভুজ	ট্রায়াঙ্গল	1	math
+বৃত্ত	সার্কেল	1	math
+কোণ	অ্যাঙ্গেল	1	math
+গড়	মধ্যক	0	math

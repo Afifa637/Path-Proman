@@ -1,0 +1,515 @@
+{
+  "t1_banglarqa": {
+    "ingest": {
+      "questions": {
+        "train": 11912,
+        "val": 1484,
+        "test": 1493
+      },
+      "passages": {
+        "train": 2400,
+        "val": 300,
+        "test": 300
+      },
+      "leakage_clean": true,
+      "span_parts_total": 27683,
+      "span_alignment_rate_any": 0.9794,
+      "span_alignment_rate_strict": 0.9619,
+      "yes_no_answers": 2502,
+      "alignment_by_type": {
+        "yes/no": {
+          "unaligned": 2090,
+          "exact": 412
+        },
+        "single span": {
+          "exact": 16306,
+          "unaligned": 419,
+          "fuzzy": 338,
+          "whitespace": 2
+        },
+        "multiple spans": {
+          "exact": 10311,
+          "unaligned": 152,
+          "fuzzy": 147,
+          "whitespace": 8
+        },
+        "(blank)": {
+          "exact": 2,
+          "unaligned": 3
+        },
+        ".": {
+          "exact": 1
+        }
+      },
+      "alignment_floor": 0.85,
+      "span_reader_viable": true,
+      "multispan_separator": ";",
+      "duplicate_qids_disambiguated": 7,
+      "config_hash": "e696128368de",
+      "seed": 1337,
+      "written_at": "2026-09-18T10:22:29"
+    }
+  },
+  "t2_nctb": {
+    "ingest": {
+      "schooltext_kept": 43359,
+      "schooltext_chapters": 1535,
+      "schooltext_subjects": 32,
+      "schooltext_by_grade": {
+        "6": 5960,
+        "7": 6964,
+        "8": 7431,
+        "9-10": 23004,
+        "filtered": 7074
+      },
+      "bangla_textbook_kept": 40000,
+      "total": 83359,
+      "config_hash": "e696128368de",
+      "seed": 1337,
+      "written_at": "2026-09-18T09:45:31"
+    }
+  },
+  "t3_wiki": {
+    "distractors": {
+      "articles_read": 18477,
+      "kept": 31049,
+      "excluded_gold_title": 399,
+      "chunk_tokens": [
+        120,
+        180
+      ],
+      "chunk_overlap": 30,
+      "config_hash": "e696128368de",
+      "seed": 1337,
+      "written_at": "2026-09-18T10:36:20"
+    }
+  },
+  "t3_index": {
+    "assembly": {
+      "universe": 50000,
+      "dedup": {
+        "seen": 117408,
+        "kept": 116044,
+        "exact_duplicate": 177,
+        "protected_exact_duplicate": 3,
+        "protected_near_duplicate": 12,
+        "near_duplicate": 1190,
+        "protected_kept": 3000
+      },
+      "dedup_by_source": {
+        "exact_dup_gold": 3,
+        "near_dup_wiki": 1,
+        "exact_dup_nctb_schooltext": 16,
+        "near_dup_nctb_schooltext": 6,
+        "near_dup_bangla_textbook": 1183,
+        "exact_dup_bangla_textbook": 158
+      },
+      "sizes": {
+        "10000": {
+          "gold": 3000,
+          "wiki": 3800,
+          "nctb": 3200
+        },
+        "50000": {
+          "gold": 3000,
+          "wiki": 27000,
+          "nctb": 20000
+        }
+      },
+      "nested": true,
+      "gold_at_every_size": true,
+      "config_hash": "e696128368de",
+      "seed": 1337,
+      "written_at": "2026-09-18T10:39:25"
+    },
+    "audit": {
+      "total_passages": 50000,
+      "by_source": {
+        "gold": {
+          "source": "gold",
+          "passages": 3000,
+          "chars_median": 1377,
+          "chars_p10": 666,
+          "chars_p90": 2456,
+          "tokens_median": 203,
+          "tokens_p90": 360,
+          "bengali_ratio_mean": 0.9595,
+          "bengali_ratio_min": 0.8879,
+          "sample_checked": 200,
+          "with_citation_metadata": 0
+        },
+        "nctb_schooltext": {
+          "source": "nctb_schooltext",
+          "passages": 20000,
+          "chars_median": 353,
+          "chars_p10": 190,
+          "chars_p90": 570,
+          "tokens_median": 57,
+          "tokens_p90": 93,
+          "bengali_ratio_mean": 0.9335,
+          "bengali_ratio_min": 0.6089,
+          "sample_checked": 200,
+          "with_citation_metadata": 20000
+        },
+        "wiki": {
+          "source": "wiki",
+          "passages": 27000,
+          "chars_median": 1288,
+          "chars_p10": 667,
+          "chars_p90": 2000,
+          "tokens_median": 189,
+          "tokens_p90": 298,
+          "bengali_ratio_mean": 0.9394,
+          "bengali_ratio_min": 0.603,
+          "sample_checked": 200,
+          "with_citation_metadata": 0
+        }
+      },
+      "gold_coverage": {
+        "10000": {
+          "index_size": 10000,
+          "gold_present": 3000
+        },
+        "50000": {
+          "index_size": 50000,
+          "gold_present": 3000
+        }
+      },
+      "sample_per_source": 200,
+      "config_hash": "e696128368de",
+      "seed": 1337,
+      "written_at": "2026-09-18T10:39:33"
+    }
+  },
+  "t6b_resources": {
+    "probe": {
+      "lexicon": {
+        "pairs_total": 80,
+        "pairs_reviewed": 56,
+        "pairs_unreviewed": 24,
+        "terms_in_classes": 111,
+        "classes": 56,
+        "domains": [
+          "biology",
+          "civics",
+          "economics",
+          "general",
+          "geography",
+          "history",
+          "math",
+          "science"
+        ]
+      },
+      "variant_kinds": {
+        "english": 21,
+        "compound": 15,
+        "translit": 10
+      },
+      "probe": {
+        "reviewed_only": {
+          "variant": "reviewed_only",
+          "probe_pairs": 71,
+          "tp": 30,
+          "fp": 0,
+          "tn": 29,
+          "fn": 12,
+          "precision": 1.0,
+          "recall": 0.7143,
+          "f1": 0.8333
+        },
+        "with_unreviewed": {
+          "variant": "with_unreviewed",
+          "probe_pairs": 71,
+          "tp": 30,
+          "fp": 0,
+          "tn": 29,
+          "fn": 12,
+          "precision": 1.0,
+          "recall": 0.7143,
+          "f1": 0.8333
+        }
+      },
+      "config_hash": "e696128368de",
+      "seed": 1337,
+      "written_at": "2026-09-18T10:13:17"
+    }
+  },
+  "t7_retrieval": {
+    "val": {
+      "rows": [
+        {
+          "recall@1": 0.7870619946091644,
+          "recall@5": 0.9137466307277629,
+          "recall@10": 0.9407008086253369,
+          "mrr@10": 0.8442270461643779,
+          "ndcg@10": 0.8678975613764216,
+          "found_any": 0.9407008086253369,
+          "median_rank_when_found": 1.0,
+          "n_queries": 1484,
+          "retriever": "bm25",
+          "ms_per_query": 1.125,
+          "build_seconds": 30.28,
+          "index_mb": 10.6,
+          "index_size": 10000,
+          "split": "val",
+          "bm25_k1": 1.2,
+          "bm25_b": 0.3
+        },
+        {
+          "recall@1": 0.623989218328841,
+          "recall@5": 0.839622641509434,
+          "recall@10": 0.8854447439353099,
+          "mrr@10": 0.7204886514354171,
+          "ndcg@10": 0.7609435453464445,
+          "found_any": 0.8854447439353099,
+          "median_rank_when_found": 1.0,
+          "n_queries": 1484,
+          "retriever": "tfidf-word",
+          "ms_per_query": 0.909,
+          "build_seconds": 24.43,
+          "index_mb": 6.2,
+          "index_size": 10000,
+          "split": "val",
+          "bm25_k1": 1.2,
+          "bm25_b": 0.3
+        },
+        {
+          "recall@1": 0.6630727762803235,
+          "recall@5": 0.8847708894878706,
+          "recall@10": 0.9225067385444744,
+          "mrr@10": 0.757633540837719,
+          "ndcg@10": 0.798147998134898,
+          "found_any": 0.9225067385444744,
+          "median_rank_when_found": 1.0,
+          "n_queries": 1484,
+          "retriever": "tfidf-char",
+          "ms_per_query": 9.743,
+          "build_seconds": 111.38,
+          "index_mb": 96.2,
+          "index_size": 10000,
+          "split": "val",
+          "bm25_k1": 1.2,
+          "bm25_b": 0.3
+        },
+        {
+          "recall@1": 0.7654986522911051,
+          "recall@5": 0.9117250673854448,
+          "recall@10": 0.9386792452830188,
+          "mrr@10": 0.8303408313010742,
+          "ndcg@10": 0.857009045472334,
+          "found_any": 0.9386792452830188,
+          "median_rank_when_found": 1.0,
+          "n_queries": 1484,
+          "retriever": "rrf(bm25+char)",
+          "ms_per_query": 12.791,
+          "build_seconds": 0.0,
+          "index_mb": 106.8,
+          "index_size": 10000,
+          "split": "val",
+          "bm25_k1": 1.2,
+          "bm25_b": 0.3
+        },
+        {
+          "recall@1": 0.7129380053908356,
+          "recall@5": 0.8935309973045822,
+          "recall@10": 0.9265498652291105,
+          "mrr@10": 0.793017584392247,
+          "ndcg@10": 0.8259113153126236,
+          "found_any": 0.9265498652291105,
+          "median_rank_when_found": 1.0,
+          "n_queries": 1484,
+          "retriever": "rrf(bm25+tfidf-word+tfidf-char)",
+          "ms_per_query": 14.031,
+          "build_seconds": 0.0,
+          "index_mb": 113.1,
+          "index_size": 10000,
+          "split": "val",
+          "bm25_k1": 1.2,
+          "bm25_b": 0.3
+        },
+        {
+          "recall@1": 0.7836927223719676,
+          "recall@5": 0.9117250673854448,
+          "recall@10": 0.9407008086253369,
+          "mrr@10": 0.8418816583237069,
+          "ndcg@10": 0.8660927551563632,
+          "found_any": 0.9407008086253369,
+          "median_rank_when_found": 1.0,
+          "n_queries": 1484,
+          "retriever": "bm25+qe",
+          "ms_per_query": 1.546,
+          "build_seconds": 0.0,
+          "index_mb": 10.6,
+          "index_size": 10000,
+          "split": "val",
+          "bm25_k1": 1.2,
+          "bm25_b": 0.3,
+          "expanded_queries": 122,
+          "expanded_pct": 8.22,
+          "added_terms_per_expanded_query": 1.3
+        },
+        {
+          "recall@1": 0.7580862533692723,
+          "recall@5": 0.889487870619946,
+          "recall@10": 0.9137466307277629,
+          "mrr@10": 0.8171974607453049,
+          "ndcg@10": 0.8409801982879,
+          "found_any": 0.9137466307277629,
+          "median_rank_when_found": 1.0,
+          "n_queries": 1484,
+          "retriever": "bm25",
+          "ms_per_query": 3.379,
+          "build_seconds": 147.49,
+          "index_mb": 48.4,
+          "index_size": 50000,
+          "split": "val",
+          "bm25_k1": 0.9,
+          "bm25_b": 0.3
+        },
+        {
+          "recall@1": 0.5586253369272237,
+          "recall@5": 0.7776280323450134,
+          "recall@10": 0.8335579514824798,
+          "mrr@10": 0.6535922859709926,
+          "ndcg@10": 0.6973273015203242,
+          "found_any": 0.8335579514824798,
+          "median_rank_when_found": 1.0,
+          "n_queries": 1484,
+          "retriever": "tfidf-word",
+          "ms_per_query": 2.671,
+          "build_seconds": 143.25,
+          "index_mb": 29.9,
+          "index_size": 50000,
+          "split": "val",
+          "bm25_k1": 0.9,
+          "bm25_b": 0.3
+        },
+        {
+          "recall@1": 0.5842318059299192,
+          "recall@5": 0.7951482479784366,
+          "recall@10": 0.8618598382749326,
+          "mrr@10": 0.6773838938090966,
+          "ndcg@10": 0.7219475239812299,
+          "found_any": 0.8618598382749326,
+          "median_rank_when_found": 1.0,
+          "n_queries": 1484,
+          "retriever": "tfidf-char",
+          "ms_per_query": 42.278,
+          "build_seconds": 532.65,
+          "index_mb": 451.0,
+          "index_size": 50000,
+          "split": "val",
+          "bm25_k1": 0.9,
+          "bm25_b": 0.3
+        },
+        {
+          "recall@1": 0.715633423180593,
+          "recall@5": 0.8766846361185984,
+          "recall@10": 0.9150943396226415,
+          "mrr@10": 0.7859840948958208,
+          "ndcg@10": 0.8174474405023312,
+          "found_any": 0.9150943396226415,
+          "median_rank_when_found": 1.0,
+          "n_queries": 1484,
+          "retriever": "rrf(bm25+char)",
+          "ms_per_query": 41.482,
+          "build_seconds": 0.0,
+          "index_mb": 499.4,
+          "index_size": 50000,
+          "split": "val",
+          "bm25_k1": 0.9,
+          "bm25_b": 0.3
+        },
+        {
+          "recall@1": 0.6637466307277629,
+          "recall@5": 0.8470350404312669,
+          "recall@10": 0.8928571428571429,
+          "mrr@10": 0.7457539147734564,
+          "ndcg@10": 0.78165530974901,
+          "found_any": 0.8928571428571429,
+          "median_rank_when_found": 1.0,
+          "n_queries": 1484,
+          "retriever": "rrf(bm25+tfidf-word+tfidf-char)",
+          "ms_per_query": 48.983,
+          "build_seconds": 0.0,
+          "index_mb": 529.3,
+          "index_size": 50000,
+          "split": "val",
+          "bm25_k1": 0.9,
+          "bm25_b": 0.3
+        },
+        {
+          "recall@1": 0.7560646900269542,
+          "recall@5": 0.887466307277628,
+          "recall@10": 0.9110512129380054,
+          "mrr@10": 0.8147491229196087,
+          "ndcg@10": 0.8384607029932247,
+          "found_any": 0.9110512129380054,
+          "median_rank_when_found": 1.0,
+          "n_queries": 1484,
+          "retriever": "bm25+qe",
+          "ms_per_query": 3.635,
+          "build_seconds": 0.0,
+          "index_mb": 48.4,
+          "index_size": 50000,
+          "split": "val",
+          "bm25_k1": 0.9,
+          "bm25_b": 0.3,
+          "expanded_queries": 122,
+          "expanded_pct": 8.22,
+          "added_terms_per_expanded_query": 1.3
+        }
+      ],
+      "config_hash": "e696128368de",
+      "seed": 1337,
+      "written_at": "2026-09-18T16:56:07"
+    }
+  },
+  "t7_topics": {
+    "50k": {
+      "size": 50000,
+      "sampled": 8000,
+      "k_best": 20,
+      "silhouette_best": 0.0535,
+      "silhouette_sweep": [
+        {
+          "k": 5,
+          "silhouette": 0.0332,
+          "inertia": 887.92
+        },
+        {
+          "k": 8,
+          "silhouette": 0.0399,
+          "inertia": 847.01
+        },
+        {
+          "k": 12,
+          "silhouette": 0.0392,
+          "inertia": 798.55
+        },
+        {
+          "k": 16,
+          "silhouette": 0.0435,
+          "inertia": 766.54
+        },
+        {
+          "k": 20,
+          "silhouette": 0.0535,
+          "inertia": 735.62
+        }
+      ],
+      "source_purity": 0.7827,
+      "ami_source": 0.1807,
+      "ami_gold_vs_wiki": 0.0152,
+      "distribution_artefact": false,
+      "sources": [
+        "gold",
+        "nctb_schooltext",
+        "wiki"
+      ],
+      "config_hash": "e696128368de",
+      "seed": 1337,
+      "written_at": "2026-09-18T16:58:14"
+    }
+  }
+}

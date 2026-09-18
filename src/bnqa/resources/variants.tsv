@@ -1,0 +1,66 @@
+# Surface variants — PLAN.md task T6b.
+#
+# Not synonyms: these are the SAME term written differently.  Three kinds, each
+# of which silently costs Exact Match a point when the textbook picks one form
+# and the student picks the other (PLAN.md §9):
+#
+#   english   English<->Bangla technical term      CO2 / কার্বন ডাই-অক্সাইড
+#   compound  space, hyphen or sandhi difference   সালোকসংশ্লেষণ / সালোক সংশ্লেষণ
+#   translit  transliteration spelling variant     অক্সিজেন / অক্সিজেন্
+#
+# Digit variants (১৯৭১ / 1971) are NOT listed here: normalize() folds Bengali
+# digits to ASCII for every string in the project, so they can never diverge.
+#
+# Columns:  form <TAB> variant <TAB> kind
+
+# ---- English <-> Bangla technical terms ---------------------------------
+CO2	কার্বন ডাই-অক্সাইড	english
+co2	কার্বন ডাই-অক্সাইড	english
+O2	অক্সিজেন	english
+H2O	পানি	english
+H2O	জল	english
+DNA	ডিএনএ	english
+RNA	আরএনএ	english
+pH	পিএইচ	english
+ATP	এটিপি	english
+photosynthesis	সালোকসংশ্লেষণ	english
+oxygen	অক্সিজেন	english
+hydrogen	হাইড্রোজেন	english
+nitrogen	নাইট্রোজেন	english
+carbon	কার্বন	english
+cell	কোষ	english
+energy	শক্তি	english
+force	বল	english
+atom	পরমাণু	english
+molecule	অণু	english
+democracy	গণতন্ত্র	english
+constitution	সংবিধান	english
+
+# ---- compound / spacing / sandhi ----------------------------------------
+সালোকসংশ্লেষণ	সালোক সংশ্লেষণ	compound
+বায়ুমণ্ডল	বায়ু মণ্ডল	compound
+কার্বন ডাই-অক্সাইড	কার্বন ডাইঅক্সাইড	compound
+কার্বন ডাই-অক্সাইড	কার্বনডাইঅক্সাইড	compound
+মুক্তিযুদ্ধ	মুক্তি যুদ্ধ	compound
+জলবায়ু	জল বায়ু	compound
+হৃৎপিণ্ড	হৃদপিণ্ড	compound
+ক্ষেত্রফল	ক্ষেত্র ফল	compound
+জনসংখ্যা	জন সংখ্যা	compound
+পরিবেশদূষণ	পরিবেশ দূষণ	compound
+খাদ্যশৃঙ্খল	খাদ্য শৃঙ্খল	compound
+রক্তচাপ	রক্ত চাপ	compound
+তাপমাত্রা	তাপ মাত্রা	compound
+বিদ্যুৎশক্তি	বিদ্যুৎ শক্তি	compound
+সৌরজগৎ	সৌর জগৎ	compound
+
+# ---- transliteration spelling ------------------------------------------
+অক্সিজেন	অক্সিজেন	translit
+হাইড্রোজেন	হাইড্রজেন	translit
+ক্লোরোফিল	ক্লোরোফিল্	translit
+ইলেকট্রন	ইলেক্ট্রন	translit
+প্রোটন	প্রোটোন	translit
+নিউট্রন	নিউট্রোন	translit
+ব্যাকটেরিয়া	ব্যাকটিরিয়া	translit
+ভাইরাস	ভাইরাস	translit
+কম্পিউটার	কম্পিউটার	translit
+ইন্টারনেট	ইন্টারনেট	translit

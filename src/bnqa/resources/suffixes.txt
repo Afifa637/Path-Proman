@@ -1,0 +1,89 @@
+# Bangla suffix list — PLAN.md task T6b.
+#
+# Hand-authored (Tier A).  Two consumers, which is why it is a resource rather
+# than a constant buried in a function:
+#   1. the rule-based stemmer behind tier-3 stem+synonym F1 (T4 / §9);
+#   2. Tier B's MorphSpan-MLM, which masks a whole stem-run or a whole
+#      suffix-chain and cannot be implemented without a stem/suffix boundary
+#      (PLAN.md §8 X2/X5).  This is why T6b runs on D0, before X2.
+#
+# Ordered longest-first; the stemmer strips the longest match.  Comments and
+# blank lines are ignored.  Verb morphology is deliberately NOT here: Bangla
+# verb inflection is irregular enough that a rule list does more harm than good
+# for lexical matching, and the char n-gram vectoriser (T5) absorbs it anyway.
+
+# ---- plural / collective -------------------------------------------------
+গুলোকে
+গুলোতে
+গুলোর
+গুলিকে
+গুলিতে
+গুলির
+গুলোয়
+গুলো
+গুলি
+দেরকে
+দেরে
+দের
+বৃন্দের
+বৃন্দকে
+বৃন্দ
+সমূহের
+সমূহকে
+সমূহে
+সমূহ
+গণের
+গণকে
+গণ
+মালার
+মালা
+রাজির
+রাজি
+েরা
+রা
+
+# ---- classifiers ---------------------------------------------------------
+খানাকে
+খানার
+খানায়
+খানা
+খানি
+টুকুর
+টুকুতে
+টুকু
+টিকে
+টিতে
+টির
+টাকে
+টাতে
+টার
+টায়
+জনকে
+জনের
+টই
+টি
+টা
+
+# ---- case / postpositional ----------------------------------------------
+য়েদের
+েদের
+য়ের
+য়কে
+য়তে
+এতে
+এর
+ের
+কে
+তে
+য়ে
+য়
+রে
+র
+ে
+
+# ---- adverbial / derivational -------------------------------------------
+ভাবেই
+ভাবে
+তমভাবে
+সহকারে
+পূর্বক

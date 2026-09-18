@@ -1,0 +1,31 @@
+T5/T7  sparse retrieval - 1,484 answerable val questions
+
+=== index 10k ==============================================
+  index 10k: 10,000 passages, stemmer vocabulary 35,155 tokens
+  BM25 tuned on val: k1=1.2, b=0.3 (Recall@5 0.9137; default 1.2/0.75 scored 0.9070)
+  bm25                   R@1=0.787 R@5=0.914 R@10=0.941 MRR=0.844 nDCG=0.868 |    1.12 ms/q    10.6 MB
+  tfidf-word             R@1=0.624 R@5=0.840 R@10=0.885 MRR=0.720 nDCG=0.761 |    0.91 ms/q     6.2 MB
+  tfidf-char             R@1=0.663 R@5=0.885 R@10=0.923 MRR=0.758 nDCG=0.798 |    9.74 ms/q    96.2 MB
+  rrf(bm25+char)         R@1=0.765 R@5=0.912 R@10=0.939 MRR=0.830 nDCG=0.857 |   12.79 ms/q   106.8 MB
+  rrf(bm25+tfidf-word+tfidf-char) R@1=0.713 R@5=0.894 R@10=0.927 MRR=0.793 nDCG=0.826 |   14.03 ms/q   113.1 MB
+  bm25+qe                R@1=0.784 R@5=0.912 R@10=0.941 MRR=0.842 nDCG=0.866 |    1.55 ms/q    10.6 MB
+
+=== index 50k ==============================================
+  index 50k: 50,000 passages, stemmer vocabulary 35,155 tokens
+  BM25 tuned on val: k1=0.9, b=0.3 (Recall@5 0.8895; default 1.2/0.75 scored 0.8767)
+  bm25                   R@1=0.758 R@5=0.889 R@10=0.914 MRR=0.817 nDCG=0.841 |    3.38 ms/q    48.4 MB
+  tfidf-word             R@1=0.559 R@5=0.778 R@10=0.834 MRR=0.654 nDCG=0.697 |    2.67 ms/q    29.9 MB
+  tfidf-char             R@1=0.584 R@5=0.795 R@10=0.862 MRR=0.677 nDCG=0.722 |   42.28 ms/q   451.0 MB
+  rrf(bm25+char)         R@1=0.716 R@5=0.877 R@10=0.915 MRR=0.786 nDCG=0.817 |   41.48 ms/q   499.4 MB
+  rrf(bm25+tfidf-word+tfidf-char) R@1=0.664 R@5=0.847 R@10=0.893 MRR=0.746 nDCG=0.782 |   48.98 ms/q   529.3 MB
+  bm25+qe                R@1=0.756 R@5=0.887 R@10=0.911 MRR=0.815 nDCG=0.838 |    3.63 ms/q    48.4 MB
+
+Index-size effect on Recall@5 (PLAN.md §6.2B - bigger index, harder task):
+  bm25                   0.914 -> 0.889  (-0.024, 2.6% relative drop)
+  tfidf-word             0.840 -> 0.778  (-0.062, 7.4% relative drop)
+  tfidf-char             0.885 -> 0.795  (-0.090, 10.1% relative drop)
+  rrf(bm25+char)         0.912 -> 0.877  (-0.035, 3.8% relative drop)
+  rrf(bm25+tfidf-word+tfidf-char) 0.894 -> 0.847  (-0.046, 5.2% relative drop)
+  bm25+qe                0.912 -> 0.887  (-0.024, 2.7% relative drop)
+
+Headline (50k index, val): best arm = bm25  Recall@5 = 0.8895

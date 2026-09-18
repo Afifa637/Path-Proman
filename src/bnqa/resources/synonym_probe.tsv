@@ -1,0 +1,101 @@
+# Hand-built synonym probe set — PLAN.md task T6b "Done when".
+#
+# Measures the PRECISION of the synonym lexicon, which matters more than its
+# coverage: a false synonym silently turns tier-3 F1 into nonsense, whereas a
+# missing one only costs a point.
+#
+# The negatives are deliberately the hard cases — co-hyponyms and antonyms that
+# sit close together in any embedding space and that a distributionally-induced
+# lexicon (Tier B, X3) will be tempted to merge.  Several of them are the very
+# pairs the veto layer must keep apart (অক্সিজেন vs কার্বন ডাই-অক্সাইড, ১৯৭১ vs
+# ১৯৫২), so this probe is also an early smoke test for §10.2.
+#
+# Columns:  a <TAB> b <TAB> label   (1 = same concept, 0 = different)
+
+# ---- positives ----------------------------------------------------------
+বায়ুমণ্ডল	আবহমণ্ডল	1
+প্রক্রিয়া	পদ্ধতি	1
+মুক্তিযুদ্ধ	স্বাধীনতা যুদ্ধ	1
+সালোকসংশ্লেষণ	ফটোসিনথেসিস	1
+সালোকসংশ্লেষণ	সালোক সংশ্লেষণ	1
+কার্বন ডাই-অক্সাইড	কার্বনডাইঅক্সাইড	1
+CO2	কার্বন ডাই-অক্সাইড	1
+অক্সিজেন	অম্লজান	1
+কোষ	সেল	1
+ক্লোরোফিল	পত্রহরিৎ	1
+জনসংখ্যা	লোকসংখ্যা	1
+গণতন্ত্র	জনতন্ত্র	1
+সংবিধান	শাসনতন্ত্র	1
+ক্ষেত্রফল	এরিয়া	1
+ত্রিভুজ	ট্রায়াঙ্গল	1
+ভগ্নাংশ	ফ্র্যাকশন	1
+কর্তব্য	দায়িত্ব	1
+অধিকার	হক	1
+পার্থক্য	তফাত	1
+হৃৎপিণ্ড	হৃদযন্ত্র	1
+রক্ত	শোণিত	1
+পুষ্টি	পরিপোষণ	1
+প্রজনন	বংশবৃদ্ধি	1
+যোগ	সংকলন	1
+গুণ	গুণন	1
+নদী	স্রোতস্বিনী	1
+কৃষি	চাষাবাদ	1
+পরমাণু	এটম	1
+অণু	মলিকিউল	1
+বায়ু	বাতাস	1
+
+# ---- HELD-OUT positives: genuine synonyms deliberately ABSENT from ------
+# synonyms.tsv.  Without these the probe would only measure whether the lexicon
+# remembers its own contents, and recall would be 1.0 by construction — which
+# tells us nothing.  These are ordinary Bangla tatsama/tadbhava doublets a
+# speaker would accept; the lexicon is expected to MISS them, and that miss is
+# the honest measure of its coverage.  Tier B (X3) is scored on the same rows,
+# so "does FastText induction find synonyms a hand list missed?" becomes a
+# number rather than a claim.
+শিক্ষক	গুরু	1
+ছাত্র	শিক্ষার্থী	1
+পৃথিবী	ধরিত্রী	1
+সূর্য	রবি	1
+আকাশ	গগন	1
+বন	অরণ্য	1
+ঘর	গৃহ	1
+রাত	রজনী	1
+দিন	দিবস	1
+বই	পুস্তক	1
+সমুদ্র	সাগর	1
+আগুন	অগ্নি	1
+
+# ---- negatives: co-hyponyms (close in embedding space, NOT equivalent) ---
+অক্সিজেন	কার্বন ডাই-অক্সাইড	0
+অক্সিজেন	নাইট্রোজেন	0
+হাইড্রোজেন	অক্সিজেন	0
+উদ্ভিদ	প্রাণী	0
+সালোকসংশ্লেষণ	শ্বসন	0
+সালোকসংশ্লেষণ	প্রস্বেদন	0
+ত্রিভুজ	বৃত্ত	0
+যোগ	বিয়োগ	0
+গুণ	ভাগ	0
+কঠিন	তরল	0
+ক্ষেত্রফল	আয়তন	0
+পরিসীমা	ক্ষেত্রফল	0
+হৃৎপিণ্ড	ফুসফুস	0
+রক্ত	স্নায়ু	0
+জলবায়ু	ভূমিকম্প	0
+গণতন্ত্র	রাজতন্ত্র	0
+সংবিধান	আইন	0
+নাগরিক	সরকার	0
+কৃষি	শিল্প	0
+পরমাণু	অণু	0
+
+# ---- negatives: antonyms and polarity -----------------------------------
+অধিকার	কর্তব্য	0
+কারণ	ফলাফল	0
+উৎপাদন	ব্যবহার	0
+বৃদ্ধি	হ্রাস	0
+সর্বোচ্চ	সর্বনিম্ন	0
+
+# ---- negatives: numerals and dates (veto terms, never equivalent) --------
+1971	1952	0
+1971	1969	0
+1952	1947	0
+1	2	0
