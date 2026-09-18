@@ -1,0 +1,13 @@
+data/raw/
+data/processed/
+data/counterfactual/
+reports/receipts/
+*.pkl
+*.npz
+*.npy
+*.joblib
+__pycache__/
+*.pyc
+.pytest_cache/
+.venv/
+hf_cache/

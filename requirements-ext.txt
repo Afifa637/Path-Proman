@@ -1,0 +1,7 @@
+# Tier B — the research extension.  Install on the CUDA machine only.
+# torch is installed separately:
+#   pip install torch --index-url https://download.pytorch.org/whl/cu124
+transformers>=4.40
+gensim>=4.3
+sentencepiece>=0.2
+bert-score>=0.3

@@ -1,0 +1,12 @@
+# Tier A — the guaranteed system.  No torch, no transformers, no gensim.
+scikit-learn>=1.4
+pandas>=2.0
+numpy>=1.26
+scipy>=1.11
+pyarrow>=14.0
+datasketch>=1.6
+matplotlib>=3.7
+seaborn>=0.13
+tqdm>=4.66
+streamlit>=1.30
+pytest>=8.0
