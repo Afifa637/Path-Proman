@@ -43,7 +43,7 @@ def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--size", type=int, default=CFG.headline_index)
     ap.add_argument("--n", type=int, default=50, help="rows in the audit sheet")
-    ap.add_argument("--retriever", default="rrf")
+    ap.add_argument("--retriever", default="bm25")
     args = ap.parse_args()
 
     ensure_dirs()

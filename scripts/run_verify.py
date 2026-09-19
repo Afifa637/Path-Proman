@@ -124,7 +124,7 @@ def main() -> None:
     ap.add_argument("--size", type=int, default=CFG.headline_index)
     ap.add_argument("--eval", type=int, default=CFG.verify_eval_questions)
     ap.add_argument("--bv-questions", type=int, default=CFG.banglaverify_max_questions)
-    ap.add_argument("--retriever", default="rrf")
+    ap.add_argument("--retriever", default="bm25")
     ap.add_argument("--skip-banglaverify", action="store_true")
     args = ap.parse_args()
 

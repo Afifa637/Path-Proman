@@ -131,7 +131,7 @@ class BanglaQA:
 
     @classmethod
     def load(cls, *, size: int | None = None, corpus: Sequence[dict] | None = None,
-             retriever: str = "rrf", policy: str = "conformal",
+             retriever: str = "bm25", policy: str = "conformal",
              models_dir: Path | None = None, verbose: bool = False) -> "BanglaQA":
         """Build from the fitted artefacts on disk.
 
@@ -369,7 +369,15 @@ class BanglaQA:
 
 
 def build_retriever(kind: str, passages: Sequence[dict]) -> BaseRetriever:
-    """``bm25`` · ``tfidf-word`` · ``tfidf-char`` · ``rrf`` (the default)."""
+    """``bm25`` (the default) · ``tfidf-word`` · ``tfidf-char`` · ``rrf``.
+
+    **BM25 is the shipped arm, and that is a measured decision** (T7, val,
+    50k index): it beats every other arm on Recall@5 *and* is the cheapest.
+    The RRF hybrid actively hurts here — fusing a weak arm (char TF-IDF,
+    0.801) with a strong one (BM25, 0.891) drags the result down to 0.873,
+    because rank fusion assumes the arms are comparable and these are not.
+    The others stay selectable so the UI can demonstrate RQ1 live.
+    """
     if kind == "bm25":
         return BM25Retriever().timed_build(passages)
     if kind == "tfidf-word":

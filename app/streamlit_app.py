@@ -87,7 +87,7 @@ size = st.sidebar.selectbox("সূচক (index)", sorted(CFG.index_sizes),
                             index=len(CFG.index_sizes) - 1,
                             format_func=lambda n: f"{n // 1000}k passages")
 retriever_kind = st.sidebar.selectbox(
-    "রিট্রিভার", ["rrf", "bm25", "tfidf-word", "tfidf-char"],
+    "রিট্রিভার", ["bm25", "rrf", "tfidf-word", "tfidf-char"],
     help="RQ1 live: switch the retrieval arm and watch the evidence change.")
 
 tampered = st.sidebar.radio(

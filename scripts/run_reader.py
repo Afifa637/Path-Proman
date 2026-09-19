@@ -202,7 +202,7 @@ def main() -> None:
     ap.add_argument("--size", type=int, default=CFG.headline_index)
     ap.add_argument("--train", type=int, default=CFG.reader_train_questions)
     ap.add_argument("--eval", type=int, default=CFG.reader_eval_questions)
-    ap.add_argument("--retriever", default="rrf")
+    ap.add_argument("--retriever", default="bm25")
     ap.add_argument("--no-bag", action="store_true", help="skip the S5 ensemble")
     args = ap.parse_args()
 
