@@ -96,17 +96,14 @@ def main() -> None:
             m["split"] = "val"
             m["bm25_k1"] = k1
             m["bm25_b"] = b
-            if isinstance(r, ExpandedQuery):
-                # Coverage is the number that explains this row.  The T6b lexicon
-                # is curriculum-domain and hand-authored; BanglaRQA questions are
-                # Wikipedia-domain, so expansion can only fire where the two
-                # vocabularies overlap.  Reporting the overlap turns "query
-                # expansion did nothing" into a measured explanation, and sets the
-                # baseline Tier B's induced synonyms (X3) have to beat.
-                m["expanded_queries"] = r.expanded_queries
-                m["expanded_pct"] = round(100 * r.expanded_queries / max(len(val), 1), 2)
-                m["added_terms_per_expanded_query"] = round(
-                    r.added_terms / max(r.expanded_queries, 1), 2)
+            # Query-expansion coverage arrives via the arm's own counters
+            # (evaluate_retriever snapshots them).  It is the number that
+            # explains this row: the T6b lexicon is curriculum-domain and
+            # hand-authored, BanglaRQA questions are Wikipedia-domain, so
+            # expansion can only fire where the two vocabularies overlap.
+            # Reporting that overlap turns "query expansion did nothing" into a
+            # measured explanation, and sets the baseline Tier B's induced
+            # synonyms (X3) have to beat.
             table.append(m)
             print(f"  {m['retriever']:22s} R@1={m['recall@1']:.3f} R@5={m['recall@5']:.3f} "
                   f"R@10={m['recall@10']:.3f} MRR={m['mrr@10']:.3f} nDCG={m['ndcg@10']:.3f} "

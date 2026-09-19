@@ -1,0 +1,6 @@
+answer_type,parts,aligned,pct,exact,normalized,whitespace,fuzzy,unaligned,counted_toward_floor,config_hash,seed
+single span,17065,16646,97.54,16306,0,2,338,419,True,325b04a5ded2,1337
+multiple spans,10618,10466,98.57,10311,0,8,147,152,True,325b04a5ded2,1337
+yes/no,2502,412,16.47,412,0,0,0,2090,False,325b04a5ded2,1337
+(blank),5,2,40.0,2,0,0,0,3,False,325b04a5ded2,1337
+.,1,1,100.0,1,0,0,0,0,False,325b04a5ded2,1337

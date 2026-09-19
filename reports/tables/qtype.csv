@@ -1,0 +1,2 @@
+n_train,n_val,accuracy,routes_polarity,routes_list,routes_span,config_hash,seed
+11912,1484,0.9016,234,122,1128,325b04a5ded2,1337

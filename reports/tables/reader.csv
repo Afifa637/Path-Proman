@@ -1,0 +1,3 @@
+reader,split,index_size,retriever,n,tier1_em,tier2_token_f1,tier3_stem_syn_f1,n_hasans,n_noans,hasans_f1,abstention_rate,config_hash,seed
+reader-logreg,val,10000,rrf(bm25+char),40,0.1,0.1728,0.1728,40,0,0.1728,0.0,325b04a5ded2,1337
+reader-gbdt,val,10000,rrf(bm25+char),40,0.05,0.1682,0.1682,40,0,0.1682,0.0,325b04a5ded2,1337
