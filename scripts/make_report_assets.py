@@ -192,7 +192,7 @@ def model_card(receipts: dict, deterministic: bool, args) -> str:
                          f"{best.get('tier3_stem_syn_f1')}")
     if conf:
         if conf.get("vacuous_zero_coverage") or not conf.get("guarantee_in_force", True):
-            lines.append(f"- **Guarantee (VC-14): NOT IN FORCE.** {conf.get('claim', '')}")
+            lines.append("- **Guarantee (VC-14): NOT IN FORCE.**")
             lines.append(
                 "  - No threshold satisfied the risk bound on the calibration "
                 "split, so under this policy the system answers nothing and the "

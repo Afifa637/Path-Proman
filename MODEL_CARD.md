@@ -13,8 +13,8 @@
 
 | Artefact | File | Parameters | sha256 |
 |---|---|---|---|
-| calibrator | `data/processed/models/calibrator.pkl` | — | `5d6a37c36ef6e16d…` |
-| fusion | `data/processed/models/fusion.pkl` | 30 | `a8de1b50285da56f…` |
+| calibrator | `data/processed/models/calibrator.pkl` | — | `84d3dfd94f1208e4…` |
+| fusion | `data/processed/models/fusion.pkl` | 30 | `a530fad0161ed447…` |
 | qtype | `data/processed/models/qtype.pkl` | — | `0f0370735a8e77ab…` |
 | reader_bag_0 | `data/processed/models/reader_bag_0.pkl` | 32 | `b97ebb794f5b851a…` |
 | reader_bag_1 | `data/processed/models/reader_bag_1.pkl` | 32 | `02ab83caf7893c81…` |
@@ -23,7 +23,7 @@
 | reader_bag_4 | `data/processed/models/reader_bag_4.pkl` | 32 | `0c515161dbdb460f…` |
 | reader_gbdt | `data/processed/models/reader_gbdt.pkl` | 145 boosting iterations | `b467bf23d5d4e2df…` |
 | reader_logreg | `data/processed/models/reader_logreg.pkl` | 32 | `dfaa2558114375d2…` |
-| s3_support | `data/processed/models/s3_support.pkl` | 51 boosting iterations | `8729591ee2697c40…` |
+| s3_support | `data/processed/models/s3_support.pkl` | 49 boosting iterations | `c53af148950cdd17…` |
 | conformal | `data/processed/models/conformal.json` | — | `2fb2832c453833c5…` |
 
 ## Corpus
@@ -42,9 +42,10 @@
 ## What it does, measured
 
 - Reader (reader-gbdt), val: tier-1 EM 0.1138 · **tier-2 token F1 0.2268** (headline) · tier-3 F1 0.2305
-- **Guarantee (VC-14):** with 90% confidence, at most 10% of answered questions are wrong
-  - achieved on test: selective risk 0.0 at coverage 0.0 — bound HELD
-- **Counterfactual (VC-7):** CAR 0.6667 · AoRR 0.9333 over N=15
+- **Guarantee (VC-14): NOT IN FORCE.**
+  - No threshold satisfied the risk bound on the calibration split, so under this policy the system answers nothing and the achieved risk of 0.0 at coverage 0.0 is **vacuous** — it is not evidence that the bound holds.
+  - The conformal machinery is correct and is exercised by `tests/test_metrics_and_conformal.py`; what fails is the *system*, because a reader at 0.227 token F1 cannot be thresholded into a ≤10% error rate at any useful coverage.
+- **Counterfactual (VC-7):** CAR 0.8667 · AoRR 0.9333 over N=15
 - **Receipts (VC-3):** 50/50 re-verify against the corpus
 - **Determinism (VC-8):** same question + same seed -> byte-identical answer
 

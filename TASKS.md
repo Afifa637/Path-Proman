@@ -18,23 +18,26 @@ produced it (VC-12). Nothing here is typed by hand from memory.
 | **T6b** Lexical resources + probe | ✅ done | `resources/{suffixes,synonyms,variants,synonym_probe}`, `tables/synonym_probe.csv` | precision **1.000** (0 false merges on 29 hard negatives), recall **0.714** |
 | **T7** RRF hybrid, query expansion, index-size comparison, topics | ✅ done | `tables/retrieval.csv`, `tables/retrieval_index_size.csv`, `tables/retrieval_length_control.csv`, `figures/topics_50k.png` | RQ1 answered on val at both sizes |
 | **T10** Reader: question type, candidates, feature span ranker | ✅ done | `tables/reader.csv`, `tables/reader_features.csv`, `tables/qtype.csv` | tier-2 F1 **0.227** (gbdt), question-type head **0.902**; candidate recall **0.472** is the binding ceiling |
-| **T11** Verifier: veto, S1–S5, fusion, calibration, conformal | 🟡 code done, **evaluation must re-run** | `tables/{fusion,calibration}.csv` written; `conformal`/`abstention_policies` **not yet** | fusion (RQ5) and the calibration study completed; the run then died on a pickling bug before conformal. Both are now fixed — see findings 15–16 |
-| **T11b** BanglaVerify + S3 | 🟡 code done, **must re-run** | `banglaverify_*.jsonl` regenerated; `tables/banglaverify_quality.csv` | the first build was invalid (finding #15); construction fixed and spot-checked, full build pending |
-| **T12** `pipeline.py` + 3-tab Streamlit | ✅ done | `src/bnqa/pipeline.py`, `app/streamlit_app.py` | the six-tuple, all three tabs, the VC-7 sidebar toggle; end-to-end ask + receipt verified |
-| **V1** Evidence receipts + `verify_receipt.py` | 🟡 code done, **not yet run at scale** | `scripts/verify_receipt.py`, `tests/test_span_is_substring.py` | the receipt round-trip and its tamper check pass in `pytest`; `reports/receipts/` is filled by T13 |
-| **V2** Offline mode + determinism | ✅ done | `src/bnqa/offline.py`, `tests/test_determinism_and_offline.py` | `BNQA_OFFLINE=1` raises on any outbound connection |
-| **V3** Counterfactual corpus test | 🟡 code done, **not yet run** | `scripts/run_counterfactual.py`, `bnqa/eval/counterfactual.py` | needs the fitted verifier, so it follows the T11 re-run |
-| **V4** Teacher audit sheet + model card | 🟡 code done, **not yet run** | `scripts/make_report_assets.py` | same dependency |
-| **T13** Evaluation pass → `results.json` | 🟡 partial | `reports/results.json`, `scripts/run_all.ps1` | T0–T7 and T10 are current and single-hash; T11 onward pending |
+| **T11** Verifier: veto, S1–S5, fusion, calibration, conformal | ✅ done | `tables/{fusion,calibration,conformal,conformal_curve,verify_contrast,abstention_policies,reliability}.csv`, `figures/{reliability,risk_coverage}.png` | RQ5: logreg AUROC **0.727**, Naive Bayes **0.506 = chance**. Platt cuts ECE **0.291 → 0.074**. RQ8: **no feasible τ** — reported as NOT IN FORCE, see finding #17 |
+| **T11b** BanglaVerify + S3 | ✅ done | `banglaverify_{train,val,contrast}.jsonl`, `tables/{banglaverify_quality,banglaverify_sample,s3_support}.csv` | 20,431 train / 496 contrast held out; S3 val **0.963**, contrast **0.913** vs 0.750 majority |
+| **T12** `pipeline.py` + 3-tab Streamlit | ✅ done | `src/bnqa/pipeline.py`, `app/streamlit_app.py` | the six-tuple, all three tabs, the VC-7 sidebar toggle |
+| **V1** Evidence receipts + `verify_receipt.py` | ✅ done | `reports/receipts/*.json`, `scripts/verify_receipt.py` | **50/50 receipts re-verify** against the corpus, offline |
+| **V2** Offline mode + determinism | ✅ done | `src/bnqa/offline.py`, `tests/test_determinism_and_offline.py` | `BNQA_OFFLINE=1` raises on any outbound connection; same question twice is **byte-identical** |
+| **V3** Counterfactual corpus test | ✅ done | `tables/counterfactual.csv`, `data/counterfactual/passages_tampered.jsonl` | **CAR 0.867 · AoRR 0.933** over N=15 |
+| **V4** Teacher audit sheet + model card | ✅ done | `tables/audit_sample.csv`, `MODEL_CARD.md` | 50 rows, spot-checkable on paper |
+| **T13** Evaluation pass → `results.json` | ✅ done | `reports/results.json`, `scripts/run_all.ps1` | every row carries config hash `773e1b820203`; VC-12 prune reports clean |
 | ~~G1–G3 Grading~~ | ❌ removed | | out of scope — PLAN.md §12 |
 
-**Where Tier A actually stands.** Every Tier-A component is written, committed
-and unit-tested (91 tests). T0–T7 and T10 have been run end to end at the 50k
-headline index and their numbers are in `reports/`. **T11 onward needs one more
-run**: the first attempt produced an invalid S3 dataset (finding #15) and then
-crashed on a pickling bug (finding #16). Both defects are fixed and verified on
-a reduced build; the full pass is `scripts/run_all.ps1` from T11 down, about an
-hour. Tier B (X1–X13) has not been started.
+**Tier A is complete and has been run end to end** at the 50k headline index.
+Every task above is evaluated, every number in `reports/` carries the single
+config hash `773e1b820203`, and 93 tests pass. Tier B (X1–X13) has not been
+started.
+
+**The one promise Tier A does not keep is the conformal guarantee**, and that
+is stated rather than worked around: no threshold satisfies a ≤10% selective
+risk bound, because the reader's tier-2 F1 is 0.227 and only 20.1% of val
+answers are correct. The machinery is right and tested; the system is not good
+enough for the contract yet. See finding #17.
 
 ## Findings that changed the code
 
@@ -196,20 +199,18 @@ Every one of these was found by running the thing, not by planning it.
     span and the evidence is a retrieved passage.
 
     Claims are now judged against their **containing passage**. Identical pairs
-    fall to **0**, and the honest numbers on a reduced build are val **0.938**
-    (majority 0.409) and **contrast 0.728 against a 0.672 majority** — barely
-    above baseline, with CONTRADICTED recall only 0.610. That is exactly the
-    outcome §10.7 tells us to report rather than bury: on held-out minimal
-    pairs the lexical classifier is close to a similarity detector, **which is
-    the argument for the veto layer**, not against it.
+    fall to **0**, and the honest full-build numbers are S3 val **0.963**
+    (majority 0.339) and **contrast 0.913 against a 0.750 majority** — a real
+    +16 points on held-out minimal pairs rather than a free 1.0000.
 
     The change also exposed that generator quality must be scored at sentence
     level: checking a negated claim against a whole passage made the polarity
     generator look like 0.750, because almost any passage contains a negation
     somewhere. Scored against the sentence it was perturbed from — the
-    comparison the veto layer actually performs — it is **0.995**. The entity
-    generator sits at **0.872**, below PLAN.md §10.3's ~90% floor, and is
-    flagged rather than quietly kept.
+    comparison the veto layer actually performs — it is **0.999**. Final
+    generator precision: relation_order 1.000, date 1.000, polarity 0.999,
+    unit 0.994, numeral 0.988, **entity 0.878**. The entity generator is below
+    PLAN.md §10.3's ~90% floor and is flagged rather than quietly kept.
 
 16. **The calibration study ran, then threw its own results away.** The fitted
     calibrator held a lambda closure, so `pickle.dump` raised
@@ -219,12 +220,61 @@ Every one of these was found by running the thing, not by planning it.
     plain picklable objects. The comparison itself was sound: Platt
     **ECE 0.079**, isotonic 0.080, temperature 0.282, uncalibrated 0.291.
 
-    Fusion (RQ5) completed and is worth keeping: logreg **AUROC 0.729**, GBDT
-    0.722, **Naive Bayes 0.505 — chance**. The generative arm's independence
-    assumption is badly violated here, which is the measured answer to Sir's
-    Q5 rather than a paragraph about it.
+    Fusion (RQ5) is worth keeping: logreg **AUROC 0.727**, GBDT 0.726,
+    **Naive Bayes 0.506 — chance**, while predicting a mean confidence of 0.95
+    at 21% accuracy. The generative arm's independence assumption is badly
+    violated here (S1 and S5 are both functions of the same reader), which is
+    the measured answer to Sir's Q5 rather than a paragraph about it. Final
+    calibration: Platt **ECE 0.074**, isotonic 0.095, temperature 0.286,
+    uncalibrated 0.291 — a 3.9× reduction, and the test split independently
+    lands at ECE 0.050.
 
-17. **`results.json` had accumulated three different config hashes**, some
+17. **The veto layer is a sentence-level instrument, and applying it to a
+    passage inverted its own ablation.** With BanglaVerify now pairing claims
+    against passages, the contrast-set ablation first said the veto layer made
+    things *worse*: accuracy 0.881 → 0.839. It was improving every
+    contradiction class and wrecking the others — SUPPORTED 0.936 → 0.694,
+    NEUTRAL 0.984 → 0.468 — by firing on **29% of correct claims**.
+
+    Cause: polarity is a property of a sentence. Almost any passage of school
+    text contains a negation somewhere, so an affirmative claim "contradicts"
+    it; 16 of the 21 false vetoes were polarity, 3 numeral, 2 date. The
+    pipeline never had this bug, because it checks an answer against its own
+    evidence sentence. Anything holding a passage has to narrow it first, so
+    `best_evidence_sentence` does that by exact content-token overlap — set
+    arithmetic, no similarity measure, so §10.2's isolation guarantee holds.
+
+    After the fix the ablation says what it should. **The veto layer beats
+    veto-off on every contradiction generator** — numeral 0.823 → 0.903, date
+    0.919 → 0.968, relation_order 0.887 → 0.936, unit 0.887 → 0.936, entity
+    0.839 → 0.871 — leaves SUPPORTED untouched at 0.968 with a fire rate of
+    **1.6%** (down from 29%), and nets 0.913 → **0.917**.
+
+    The residual cost is confined to NEUTRAL, 0.984 → 0.758 at a 24% fire
+    rate: a claim that shares enough tokens with an unrelated passage's best
+    sentence gets read as contradicted rather than as unaddressed. That is the
+    honest remaining limitation, and it is left measured rather than tuned
+    away.
+
+18. **The ≤10% guarantee cannot be met, and a bound satisfied at zero coverage
+    is not satisfied.** No τ on the calibration grid achieves a Clopper–Pearson
+    upper bound ≤ 0.10, so the conformal policy answers nothing. The first run
+    printed *"achieved: selective risk 0.0000 at coverage 0.0000 — bound
+    HELD"*, which is the single most misleading line this project could
+    produce: the guarantee is about the questions the system **does** answer.
+
+    `verify()` now returns `guarantee_in_force` and `vacuous_zero_coverage`,
+    reports **NOT IN FORCE**, and two tests lock the behaviour in. The
+    conformal machinery is correct — it is exercised on synthetic data where a
+    feasible τ exists — and what fails is the *system*: a reader at 0.227
+    token F1, with 20.1% of val answers correct, cannot be thresholded into a
+    10% error rate at any useful coverage. Confidence does carry real signal
+    (AUROC 0.727 val, 0.714 test); there is simply not enough of it.
+
+    This is the number the report should lead the limitations section with,
+    and the reason is the reader, not the verifier.
+
+19. **`results.json` had accumulated three different config hashes**, some
     written on a different machine, and a stale row is indistinguishable from a
     current one by inspection — which is precisely what VC-12 exists to
     prevent. `stale_results()` names them, `prune_results()` removes them, and

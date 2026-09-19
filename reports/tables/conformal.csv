@@ -1,2 +1,2 @@
-tau,alpha,delta,calibration_n,answered,coverage,empirical_risk,risk_upper_bound,feasible,n_test,achieved_selective_risk,errors_among_answered,bound_held,claim,config_hash,seed
-1.0,0.1,0.1,400,0,0.0,0.0,1.0,False,797,0.0,0,True,"with 90% confidence, at most 10% of answered questions are wrong",773e1b820203,1337
+tau,alpha,delta,calibration_n,answered,coverage,empirical_risk,risk_upper_bound,feasible,n_test,achieved_selective_risk,errors_among_answered,guarantee_in_force,bound_held,vacuous_zero_coverage,claim,config_hash,seed
+1.0,0.1,0.1,400,0,0.0,0.0,1.0,False,797,0.0,0,False,,True,"NOT IN FORCE — no threshold met the ≤10% risk bound on the calibration split, so the system answers nothing under this policy",773e1b820203,1337
