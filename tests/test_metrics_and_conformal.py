@@ -158,3 +158,40 @@ def test_isotonic_calibration_reduces_ece_on_a_skewed_model():
     cal = fit_calibrator("isotonic", p, y)
     after = expected_calibration_error(cal(p), y)
     assert after <= before + 1e-9
+
+
+def test_zero_coverage_is_never_reported_as_the_bound_holding():
+    """A guarantee satisfied by answering nothing is not a guarantee.
+
+    When no threshold is feasible, tau is 1.0 and the selective risk among
+    answered questions is trivially 0.  Printing "bound HELD" there would be
+    the most misleading number this project could produce, because the whole
+    claim is about the questions the system *does* answer.
+    """
+    conf = np.linspace(0.4, 0.6, 200)
+    correct = np.zeros(200, dtype=bool)
+    threshold, _ = select_threshold(conf, correct, alpha=0.10, delta=0.10)
+    assert not threshold.feasible
+
+    out = verify(threshold, conf, correct)
+    assert out["answered"] == 0
+    assert out["vacuous_zero_coverage"] is True
+    assert out["guarantee_in_force"] is False
+    assert out["bound_held"] is None, "must not claim the bound held at zero coverage"
+    assert "NOT IN FORCE" in out["claim"]
+
+
+def test_a_real_guarantee_is_still_reported_as_one():
+    rng = np.random.default_rng(7)
+    n = 800
+    conf = rng.uniform(0, 1, n)
+    correct = rng.uniform(0, 1, n) < conf ** 0.4      # confident ones are right
+    threshold, _ = select_threshold(conf, correct, alpha=0.10, delta=0.10)
+    if not threshold.feasible:                         # pragma: no cover
+        pytest.skip("no feasible tau for this draw")
+    out = verify(threshold, conf, correct)
+    assert out["answered"] > 0
+    assert out["vacuous_zero_coverage"] is False
+    assert out["guarantee_in_force"] is True
+    assert out["bound_held"] in (True, False)
+    assert "confidence" in out["claim"]

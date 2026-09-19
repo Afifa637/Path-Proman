@@ -78,7 +78,7 @@ def contrast_ablation(items: Sequence[dict], support_model) -> list[dict]:
     contribution did not materialise rather than quietly dropping the table.
     """
     from ..verify.banglaverify import CONTRADICTED, LABELS
-    from ..verify.constraints import check
+    from ..verify.constraints import check_passage
 
     if not items:
         return []
@@ -90,7 +90,7 @@ def contrast_ablation(items: Sequence[dict], support_model) -> list[dict]:
     else:
         base = [CONTRADICTED] * len(items)
 
-    fired = [check(i["statement"], i["evidence"]).fired for i in items]
+    fired = [check_passage(i["statement"], i["evidence"]).fired for i in items]
     with_veto = [CONTRADICTED if f else b for b, f in zip(base, fired)]
 
     rows: list[dict] = []

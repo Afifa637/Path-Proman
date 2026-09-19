@@ -116,7 +116,14 @@ class ValuePools:
                     seen_e.add(e)
                     self.entities.append(e)
             term_counts.update(t for t in content_tokens(tokenize(sent)) if len(t) > 3)
-        self.years = sorted(set(self.years))
+        # A year replacement has to be a *plausible* year.  ``years()`` also
+        # returns any number sitting next to সাল, so the raw pool picks up
+        # things like "3" and "46" — and swapping ১৯৭৩ for ৩ produces a
+        # "contradiction" no system needs a contradiction detector to reject,
+        # which understates CAR in the counterfactual test and weakens the
+        # negatives in BanglaVerify.  Four digits in range, or nothing.
+        self.years = sorted({y for y in self.years
+                             if len(y) == 4 and 1000 <= int(y) <= 2100})
         self.numbers = sorted(set(self.numbers))
         self.units = sorted(set(self.units))
         # Content terms for the entity generator's fallback.  Restricted to

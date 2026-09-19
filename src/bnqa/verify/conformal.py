@@ -136,6 +136,21 @@ def verify(threshold: ConformalThreshold, confidence: Sequence[float],
     n_ans = int(answered.sum())
     errors = int((~ok[answered]).sum()) if n_ans else 0
     risk = errors / n_ans if n_ans else 0.0
+
+    # **A bound satisfied at zero coverage is not satisfied.**  When no
+    # threshold was feasible, tau is 1.0, nothing is answered, and the
+    # selective risk is trivially 0 — reporting "bound HELD" there would be
+    # the single most misleading number this project could print, because the
+    # guarantee is about the questions we *do* answer.  Say so instead.
+    vacuous = n_ans == 0
+    if vacuous or not threshold.feasible:
+        claim = (f"NOT IN FORCE — no threshold met the "
+                 f"≤{100 * threshold.alpha:.0f}% risk bound on the calibration "
+                 f"split, so the system answers nothing under this policy")
+    else:
+        claim = (f"with {100 * (1 - threshold.delta):.0f}% confidence, at most "
+                 f"{100 * threshold.alpha:.0f}% of answered questions are wrong")
+
     return {
         "tau": threshold.tau,
         "alpha": threshold.alpha,
@@ -145,9 +160,10 @@ def verify(threshold: ConformalThreshold, confidence: Sequence[float],
         "coverage": round(n_ans / max(len(conf), 1), 4),
         "achieved_selective_risk": round(risk, 4),
         "errors_among_answered": errors,
-        "bound_held": bool(risk <= threshold.alpha),
-        "claim": (f"with {100 * (1 - threshold.delta):.0f}% confidence, at most "
-                  f"{100 * threshold.alpha:.0f}% of answered questions are wrong"),
+        "guarantee_in_force": bool(threshold.feasible and not vacuous),
+        "bound_held": (None if vacuous else bool(risk <= threshold.alpha)),
+        "vacuous_zero_coverage": bool(vacuous),
+        "claim": claim,
     }
 
 

@@ -192,59 +192,6 @@
       "written_at": "2026-09-19T10:50:58"
     }
   },
-  "t6b_resources": {
-    "probe": {
-      "lexicon": {
-        "pairs_total": 80,
-        "pairs_reviewed": 56,
-        "pairs_unreviewed": 24,
-        "terms_in_classes": 111,
-        "classes": 56,
-        "domains": [
-          "biology",
-          "civics",
-          "economics",
-          "general",
-          "geography",
-          "history",
-          "math",
-          "science"
-        ]
-      },
-      "variant_kinds": {
-        "english": 21,
-        "compound": 15,
-        "translit": 10
-      },
-      "probe": {
-        "reviewed_only": {
-          "variant": "reviewed_only",
-          "probe_pairs": 71,
-          "tp": 30,
-          "fp": 0,
-          "tn": 29,
-          "fn": 12,
-          "precision": 1.0,
-          "recall": 0.7143,
-          "f1": 0.8333
-        },
-        "with_unreviewed": {
-          "variant": "with_unreviewed",
-          "probe_pairs": 71,
-          "tp": 30,
-          "fp": 0,
-          "tn": 29,
-          "fn": 12,
-          "precision": 1.0,
-          "recall": 0.7143,
-          "f1": 0.8333
-        }
-      },
-      "config_hash": "e696128368de",
-      "seed": 1337,
-      "written_at": "2026-09-18T10:13:17"
-    }
-  },
   "t7_retrieval": {
     "val": {
       "rows": [
@@ -504,51 +451,6 @@
     }
   },
   "t7_topics": {
-    "50k": {
-      "size": 50000,
-      "sampled": 8000,
-      "k_best": 20,
-      "silhouette_best": 0.0535,
-      "silhouette_sweep": [
-        {
-          "k": 5,
-          "silhouette": 0.0332,
-          "inertia": 887.92
-        },
-        {
-          "k": 8,
-          "silhouette": 0.0399,
-          "inertia": 847.01
-        },
-        {
-          "k": 12,
-          "silhouette": 0.0392,
-          "inertia": 798.55
-        },
-        {
-          "k": 16,
-          "silhouette": 0.0435,
-          "inertia": 766.54
-        },
-        {
-          "k": 20,
-          "silhouette": 0.0535,
-          "inertia": 735.62
-        }
-      ],
-      "source_purity": 0.7827,
-      "ami_source": 0.1807,
-      "ami_gold_vs_wiki": 0.0152,
-      "distribution_artefact": false,
-      "sources": [
-        "gold",
-        "nctb_schooltext",
-        "wiki"
-      ],
-      "config_hash": "e696128368de",
-      "seed": 1337,
-      "written_at": "2026-09-18T16:58:14"
-    },
     "50000": {
       "index_size": 50000,
       "sampled": 8000,
@@ -723,80 +625,428 @@
   "t11b_banglaverify": {
     "construction": {
       "counts": {
-        "SUPPORTED": 774,
-        "CONTRADICTED": 768,
-        "NEUTRAL": 774
+        "SUPPORTED": 7756,
+        "CONTRADICTED": 7682,
+        "NEUTRAL": 7756
       },
       "by_generator": {
-        "date": 53,
-        "polarity": 404,
-        "entity": 234,
-        "numeral": 52,
-        "unit": 13,
-        "relation_order": 12
+        "date": 662,
+        "polarity": 3919,
+        "entity": 2307,
+        "numeral": 492,
+        "unit": 156,
+        "relation_order": 146
       },
       "generator_attempts": {
-        "date": 278,
-        "numeral": 268,
-        "polarity": 424,
-        "entity": 360,
-        "relation_order": 268,
-        "unit": 272
+        "date": 2778,
+        "numeral": 2752,
+        "polarity": 4094,
+        "entity": 3371,
+        "relation_order": 2693,
+        "unit": 2658
       },
       "splits": {
-        "train": 1745,
-        "val": 193,
-        "contrast": 378
+        "train": 20429,
+        "val": 2269,
+        "contrast": 496
       },
       "auto_quality": [
         {
           "generator": "numeral",
-          "n": 52,
-          "veto_detected": 50,
-          "veto_precision": 0.9615,
+          "n": 492,
+          "veto_detected": 488,
+          "veto_precision": 0.9919,
           "meets_90pct_floor": true
         },
         {
           "generator": "date",
-          "n": 53,
-          "veto_detected": 52,
-          "veto_precision": 0.9811,
+          "n": 662,
+          "veto_detected": 643,
+          "veto_precision": 0.9713,
           "meets_90pct_floor": true
         },
         {
           "generator": "unit",
-          "n": 13,
-          "veto_detected": 13,
-          "veto_precision": 1.0,
+          "n": 156,
+          "veto_detected": 153,
+          "veto_precision": 0.9808,
           "meets_90pct_floor": true
         },
         {
           "generator": "entity",
-          "n": 234,
-          "veto_detected": 204,
-          "veto_precision": 0.8718,
+          "n": 2307,
+          "veto_detected": 2045,
+          "veto_precision": 0.8864,
           "meets_90pct_floor": false
         },
         {
           "generator": "polarity",
-          "n": 404,
-          "veto_detected": 402,
-          "veto_precision": 0.995,
+          "n": 3919,
+          "veto_detected": 3914,
+          "veto_precision": 0.9987,
           "meets_90pct_floor": true
         },
         {
           "generator": "relation_order",
-          "n": 12,
-          "veto_detected": 12,
+          "n": 146,
+          "veto_detected": 146,
           "veto_precision": 1.0,
           "meets_90pct_floor": true
         }
       ],
-      "hand_sample": 247,
+      "hand_sample": 296,
       "license": "CC BY-NC-SA 4.0 (derivative of BanglaRQA)",
       "config_hash": "773e1b820203",
       "seed": 1337,
-      "written_at": "2026-09-19T14:25:52"
+      "written_at": "2026-09-19T14:37:57"
+    }
+  },
+  "t11_verify": {
+    "summary": {
+      "s3": {
+        "val": {
+          "n": 2269,
+          "accuracy": 0.9096518289995593,
+          "acc_supported": 0.9489247311827957,
+          "n_supported": 744,
+          "acc_contradicted": 0.7939233817701453,
+          "n_contradicted": 757,
+          "acc_neutral": 0.9856770833333334,
+          "n_neutral": 768,
+          "by_generator": {
+            "cross_passage": {
+              "n": 768,
+              "accuracy": 0.9857
+            },
+            "date": {
+              "n": 64,
+              "accuracy": 0.9062
+            },
+            "entity": {
+              "n": 205,
+              "accuracy": 0.878
+            },
+            "gold": {
+              "n": 744,
+              "accuracy": 0.9489
+            },
+            "numeral": {
+              "n": 55,
+              "accuracy": 0.8909
+            },
+            "polarity": {
+              "n": 414,
+              "accuracy": 0.715
+            },
+            "relation_order": {
+              "n": 9,
+              "accuracy": 0.8889
+            },
+            "unit": {
+              "n": 10,
+              "accuracy": 1.0
+            }
+          },
+          "majority_baseline": 0.3385
+        },
+        "contrast": {
+          "n": 496,
+          "accuracy": 0.8810483870967742,
+          "acc_supported": 0.9354838709677419,
+          "n_supported": 62,
+          "acc_contradicted": 0.8548387096774194,
+          "n_contradicted": 372,
+          "acc_neutral": 0.9838709677419355,
+          "n_neutral": 62,
+          "by_generator": {
+            "cross_passage": {
+              "n": 62,
+              "accuracy": 0.9839
+            },
+            "date": {
+              "n": 62,
+              "accuracy": 0.8871
+            },
+            "entity": {
+              "n": 62,
+              "accuracy": 0.9194
+            },
+            "gold": {
+              "n": 62,
+              "accuracy": 0.9355
+            },
+            "numeral": {
+              "n": 62,
+              "accuracy": 0.8548
+            },
+            "polarity": {
+              "n": 62,
+              "accuracy": 0.6935
+            },
+            "relation_order": {
+              "n": 62,
+              "accuracy": 0.8871
+            },
+            "unit": {
+              "n": 62,
+              "accuracy": 0.8871
+            }
+          },
+          "majority_baseline": 0.75
+        }
+      },
+      "contrast_ablation": [
+        {
+          "arm": "veto_off",
+          "n": 496,
+          "accuracy": 0.881,
+          "acc_supported": 0.9355,
+          "acc_contradicted": 0.8548,
+          "acc_neutral": 0.9839
+        },
+        {
+          "arm": "veto_on",
+          "n": 496,
+          "accuracy": 0.8387,
+          "acc_supported": 0.6935,
+          "acc_contradicted": 0.9247,
+          "acc_neutral": 0.4677
+        },
+        {
+          "arm": "majority_baseline",
+          "n": 496,
+          "accuracy": 0.75
+        },
+        {
+          "arm": "veto_on/cross_passage",
+          "n": 62,
+          "accuracy": 0.4677,
+          "accuracy_veto_off": 0.9839,
+          "veto_fire_rate": 0.5323
+        },
+        {
+          "arm": "veto_on/date",
+          "n": 62,
+          "accuracy": 0.9839,
+          "accuracy_veto_off": 0.8871,
+          "veto_fire_rate": 0.9677
+        },
+        {
+          "arm": "veto_on/entity",
+          "n": 62,
+          "accuracy": 0.9677,
+          "accuracy_veto_off": 0.9194,
+          "veto_fire_rate": 0.9516
+        },
+        {
+          "arm": "veto_on/gold",
+          "n": 62,
+          "accuracy": 0.6935,
+          "accuracy_veto_off": 0.9355,
+          "veto_fire_rate": 0.2903
+        },
+        {
+          "arm": "veto_on/numeral",
+          "n": 62,
+          "accuracy": 0.9677,
+          "accuracy_veto_off": 0.8548,
+          "veto_fire_rate": 0.9516
+        },
+        {
+          "arm": "veto_on/polarity",
+          "n": 62,
+          "accuracy": 0.7097,
+          "accuracy_veto_off": 0.6935,
+          "veto_fire_rate": 0.7097
+        },
+        {
+          "arm": "veto_on/relation_order",
+          "n": 62,
+          "accuracy": 0.9677,
+          "accuracy_veto_off": 0.8871,
+          "veto_fire_rate": 0.9677
+        },
+        {
+          "arm": "veto_on/unit",
+          "n": 62,
+          "accuracy": 0.9516,
+          "accuracy_veto_off": 0.8871,
+          "veto_fire_rate": 0.9516
+        }
+      ],
+      "fusion": [
+        {
+          "fusion": "logreg",
+          "auroc": 0.7194,
+          "auprc": 0.337,
+          "brier": 0.2224,
+          "accuracy@0.5": 0.695,
+          "mean_confidence": 0.4615
+        },
+        {
+          "fusion": "gbdt",
+          "auroc": 0.715,
+          "auprc": 0.3662,
+          "brier": 0.1328,
+          "accuracy@0.5": 0.82,
+          "mean_confidence": 0.1995
+        },
+        {
+          "fusion": "naive_bayes",
+          "auroc": 0.5049,
+          "auprc": 0.1741,
+          "brier": 0.7925,
+          "accuracy@0.5": 0.2075,
+          "mean_confidence": 0.95
+        }
+      ],
+      "fusion_chosen": "logreg",
+      "calibration": [
+        {
+          "method": "platt",
+          "ece": 0.0774,
+          "ace": 0.0804,
+          "brier": 0.1397,
+          "mean_confidence": 0.2327,
+          "empirical_accuracy": 0.1725
+        },
+        {
+          "method": "isotonic",
+          "ece": 0.0826,
+          "ace": 0.071,
+          "brier": 0.1434,
+          "mean_confidence": 0.2302,
+          "empirical_accuracy": 0.1725
+        },
+        {
+          "method": "temperature",
+          "ece": 0.2815,
+          "ace": 0.2815,
+          "brier": 0.2224,
+          "mean_confidence": 0.4521,
+          "empirical_accuracy": 0.1725
+        },
+        {
+          "method": "uncalibrated",
+          "ece": 0.2927,
+          "ace": 0.289,
+          "brier": 0.2224,
+          "mean_confidence": 0.4615,
+          "empirical_accuracy": 0.1725
+        }
+      ],
+      "calibrator_chosen": "platt",
+      "conformal": {
+        "tau": 1.0,
+        "alpha": 0.1,
+        "delta": 0.1,
+        "calibration_n": 400,
+        "answered": 0,
+        "coverage": 0.0,
+        "empirical_risk": 0.0,
+        "risk_upper_bound": 1.0,
+        "feasible": false,
+        "n_test": 797,
+        "achieved_selective_risk": 0.0,
+        "errors_among_answered": 0,
+        "bound_held": true,
+        "claim": "with 90% confidence, at most 10% of answered questions are wrong"
+      },
+      "policies": [
+        {
+          "policy": "b_fused",
+          "rc_auc": 0.7207,
+          "risk_at_full_coverage": 0.8275,
+          "risk_at_50pct_coverage": 0.7214,
+          "risk_at_80pct_coverage": 0.8094
+        },
+        {
+          "policy": "c_fused_veto",
+          "rc_auc": 0.7207,
+          "risk_at_full_coverage": 0.8275,
+          "risk_at_50pct_coverage": 0.7214,
+          "risk_at_80pct_coverage": 0.8094
+        },
+        {
+          "policy": "a_reader_only",
+          "rc_auc": 0.7606,
+          "risk_at_full_coverage": 0.8275,
+          "risk_at_50pct_coverage": 0.7711,
+          "risk_at_80pct_coverage": 0.8
+        },
+        {
+          "policy": "d_conformal(test)",
+          "rc_auc": 0.6932,
+          "risk_at_full_coverage": 0.8105,
+          "risk_at_50pct_coverage": 0.7293,
+          "risk_at_80pct_coverage": 0.7806
+        },
+        {
+          "policy": "b_fused(test)",
+          "rc_auc": 0.6932,
+          "risk_at_full_coverage": 0.8105,
+          "risk_at_50pct_coverage": 0.7293,
+          "risk_at_80pct_coverage": 0.7806
+        }
+      ],
+      "calibration_summary": [
+        {
+          "arm": "val(calibrated)",
+          "n": 400,
+          "accuracy": 0.1725,
+          "mean_confidence": 0.2327,
+          "ece": 0.0774,
+          "ace": 0.0804,
+          "brier": 0.1397,
+          "auroc_conf_vs_correct": 0.7194
+        },
+        {
+          "arm": "test(calibrated)",
+          "n": 797,
+          "accuracy": 0.1895,
+          "mean_confidence": 0.2312,
+          "ece": 0.047,
+          "ace": 0.0493,
+          "brier": 0.1445,
+          "auroc_conf_vs_correct": 0.7004
+        }
+      ],
+      "n_val": 800,
+      "n_test": 797,
+      "config_hash": "773e1b820203",
+      "seed": 1337,
+      "written_at": "2026-09-19T15:24:44"
+    }
+  },
+  "v3_counterfactual": {
+    "summary": {
+      "n": 15,
+      "considered": 400,
+      "car": 0.6667,
+      "aorr": 0.9333,
+      "interpretation": "CAR ~ 1.0 means the answer is read out of the corpus, not recalled from parameters; a generative model cannot do this.",
+      "config_hash": "773e1b820203",
+      "seed": 1337,
+      "written_at": "2026-09-19T15:38:14"
+    }
+  },
+  "t13_assets": {
+    "summary": {
+      "audit_rows": 50,
+      "receipts": {
+        "n": 50,
+        "passed": 50,
+        "failed": 0,
+        "all_pass": true,
+        "failures": []
+      },
+      "determinism_identical": true,
+      "answered": 2,
+      "abstained": 48,
+      "mean_token_f1": 0.02,
+      "config_hash": "773e1b820203",
+      "seed": 1337,
+      "written_at": "2026-09-19T15:41:05"
     }
   }
 }

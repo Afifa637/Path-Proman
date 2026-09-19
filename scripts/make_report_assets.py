@@ -191,11 +191,25 @@ def model_card(receipts: dict, deterministic: bool, args) -> str:
                          f"{best.get('tier2_token_f1')}** (headline) · tier-3 F1 "
                          f"{best.get('tier3_stem_syn_f1')}")
     if conf:
-        lines.append(f"- **Guarantee (VC-14):** {conf.get('claim', '—')}")
-        lines.append(f"  - achieved on test: selective risk "
-                     f"{conf.get('achieved_selective_risk')} at coverage "
-                     f"{conf.get('coverage')} — bound "
-                     f"{'HELD' if conf.get('bound_held') else 'VIOLATED'}")
+        if conf.get("vacuous_zero_coverage") or not conf.get("guarantee_in_force", True):
+            lines.append(f"- **Guarantee (VC-14): NOT IN FORCE.** {conf.get('claim', '')}")
+            lines.append(
+                "  - No threshold satisfied the risk bound on the calibration "
+                "split, so under this policy the system answers nothing and the "
+                f"achieved risk of {conf.get('achieved_selective_risk')} at "
+                f"coverage {conf.get('coverage')} is **vacuous** — it is not "
+                "evidence that the bound holds.")
+            lines.append(
+                "  - The conformal machinery is correct and is exercised by "
+                "`tests/test_metrics_and_conformal.py`; what fails is the "
+                "*system*, because a reader at 0.227 token F1 cannot be "
+                "thresholded into a ≤10% error rate at any useful coverage.")
+        else:
+            lines.append(f"- **Guarantee (VC-14):** {conf.get('claim', '—')}")
+            lines.append(f"  - achieved on test: selective risk "
+                         f"{conf.get('achieved_selective_risk')} at coverage "
+                         f"{conf.get('coverage')} — bound "
+                         f"{'HELD' if conf.get('bound_held') else 'VIOLATED'}")
     if cf:
         lines.append(f"- **Counterfactual (VC-7):** CAR {cf.get('car')} · "
                      f"AoRR {cf.get('aorr')} over N={cf.get('n')}")

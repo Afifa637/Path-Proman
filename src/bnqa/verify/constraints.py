@@ -395,6 +395,56 @@ def _bn(text: str) -> str:
     return to_bengali_digits(text)
 
 
+def best_evidence_sentence(claim: str, passage: str) -> str:
+    """The sentence of ``passage`` a claim should be checked against.
+
+    **The veto layer is a sentence-level instrument.**  Polarity especially:
+    almost any passage of school text contains a negation somewhere, so
+    comparing an affirmative claim against a whole passage reports a polarity
+    contradiction that is not there.  Measured on the BanglaVerify contrast
+    set, checking claims against whole passages fired on **29% of SUPPORTED
+    claims** — 16 polarity, 3 numeral, 2 date — and dropped supported accuracy
+    from 0.936 to 0.694.  The numeral and date rules degrade the same way,
+    because a passage holds many numbers and only one of them is the claim's.
+
+    The pipeline never had this problem: it checks an answer against its own
+    evidence sentence.  Anything holding a *passage* has to narrow it first,
+    and this is that step.
+
+    Selection is exact content-token overlap — set arithmetic, no similarity
+    measure — so the isolation guarantee in this module's docstring holds.
+    """
+    from ..preprocess.stopwords import content_tokens
+
+    sentences = [s for s, _a, _b in _sentence_spans(normalize(passage))]
+    if len(sentences) <= 1:
+        return passage
+    claim_tokens = set(content_tokens(tokenize(claim)))
+    if not claim_tokens:
+        return passage
+    best, best_score = passage, -1.0
+    for sent in sentences:
+        toks = set(content_tokens(tokenize(sent)))
+        if not toks:
+            continue
+        score = len(claim_tokens & toks) / len(claim_tokens)
+        if score > best_score:
+            best, best_score = sent, score
+    return best
+
+
+def _sentence_spans(text: str):
+    from ..preprocess.tokenize import sentence_spans
+
+    return sentence_spans(text)
+
+
+def check_passage(claim: str, passage: str, *,
+                  gazetteer: frozenset[str] | None = None) -> VetoResult:
+    """:func:`check` against the passage's most relevant sentence."""
+    return check(claim, best_evidence_sentence(claim, passage), gazetteer=gazetteer)
+
+
 def veto_features(answer: str, evidence: str, *,
                   gazetteer: frozenset[str] | None = None) -> dict[str, float]:
     """The veto layer as features for S3's classifier (§10.4)."""

@@ -276,9 +276,14 @@ def main() -> None:
 
     achieved = conformal_verify(threshold, p_test, y_test)
     print(f"    {achieved['claim']}")
-    print(f"    achieved: selective risk {achieved['achieved_selective_risk']:.4f} at "
-          f"coverage {achieved['coverage']:.4f} — bound "
-          f"{'HELD' if achieved['bound_held'] else 'VIOLATED'}")
+    if achieved["vacuous_zero_coverage"]:
+        print(f"    coverage {achieved['coverage']:.4f} — nothing was answered, so "
+              f"the achieved risk of {achieved['achieved_selective_risk']:.4f} is "
+              f"vacuous and is NOT reported as the bound holding")
+    else:
+        print(f"    achieved: selective risk {achieved['achieved_selective_risk']:.4f} "
+              f"at coverage {achieved['coverage']:.4f} — bound "
+              f"{'HELD' if achieved['bound_held'] else 'VIOLATED'}")
     save_table("conformal", [{**threshold.as_dict(), **achieved}])
 
     policy_rows_test, curves_test = compare_policies({

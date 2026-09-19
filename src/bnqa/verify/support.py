@@ -36,7 +36,7 @@ from ..preprocess.stopwords import content_tokens
 from ..preprocess.tokenize import tokenize_lower
 from ..reader.candidates import trigram_cosine
 from .banglaverify import CONTRADICTED, LABELS, NEUTRAL, SUPPORTED
-from .constraints import veto_features
+from .constraints import best_evidence_sentence, veto_features
 
 FEATURE_NAMES: tuple[str, ...] = (
     "veto_numeral", "veto_date", "veto_unit", "veto_entity", "veto_polarity",
@@ -48,6 +48,12 @@ FEATURE_NAMES: tuple[str, ...] = (
 
 
 def features(statement: str, evidence: str, *, gazetteer=None) -> dict[str, float]:
+    # The veto features are sentence-level; handing them a whole passage makes
+    # the polarity rule misfire on almost every claim (see
+    # ``constraints.best_evidence_sentence``).  The lexical-overlap features
+    # below still see the full passage, because "is this claim anywhere in
+    # this passage" is exactly what they are for.
+    veto_evidence = best_evidence_sentence(statement, evidence)
     s_toks = tokenize_lower(statement)
     e_toks = tokenize_lower(evidence)
     s_set, e_set = set(s_toks), set(e_toks)
@@ -56,7 +62,7 @@ def features(statement: str, evidence: str, *, gazetteer=None) -> dict[str, floa
     s_content = set(content_tokens(s_toks))
     e_content = set(content_tokens(e_toks))
 
-    feats = veto_features(statement, evidence, gazetteer=gazetteer)
+    feats = veto_features(statement, veto_evidence, gazetteer=gazetteer)
     feats.update({
         "token_overlap": len(inter) / max(len(s_set), 1),
         "token_jaccard": len(inter) / max(len(union), 1),

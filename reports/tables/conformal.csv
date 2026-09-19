@@ -1,0 +1,2 @@
+tau,alpha,delta,calibration_n,answered,coverage,empirical_risk,risk_upper_bound,feasible,n_test,achieved_selective_risk,errors_among_answered,bound_held,claim,config_hash,seed
+1.0,0.1,0.1,400,0,0.0,0.0,1.0,False,797,0.0,0,True,"with 90% confidence, at most 10% of answered questions are wrong",773e1b820203,1337

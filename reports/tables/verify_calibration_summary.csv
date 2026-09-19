@@ -1,0 +1,3 @@
+arm,n,accuracy,mean_confidence,ece,ace,brier,auroc_conf_vs_correct,config_hash,seed
+val(calibrated),400,0.1725,0.2327,0.0774,0.0804,0.1397,0.7194,773e1b820203,1337
+test(calibrated),797,0.1895,0.2312,0.047,0.0493,0.1445,0.7004,773e1b820203,1337
