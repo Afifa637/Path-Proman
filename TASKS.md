@@ -17,18 +17,24 @@ produced it (VC-12). Nothing here is typed by hand from memory.
 | **T5** Sparse retrieval (TF-IDF word/char, our BM25) | ✅ done | `bnqa/retrieval/`, `tables/retrieval.csv` | BM25 validated against a hand-worked example in `pytest` |
 | **T6b** Lexical resources + probe | ✅ done | `resources/{suffixes,synonyms,variants,synonym_probe}`, `tables/synonym_probe.csv` | precision **1.000** (0 false merges on 29 hard negatives), recall **0.714** |
 | **T7** RRF hybrid, query expansion, index-size comparison, topics | ✅ done | `tables/retrieval.csv`, `tables/retrieval_index_size.csv`, `tables/retrieval_length_control.csv`, `figures/topics_50k.png` | RQ1 answered on val at both sizes |
-| **T10** Reader: question type, candidates, feature span ranker | ✅ done | `tables/reader.csv`, `tables/reader_features.csv`, `tables/qtype.csv` | metric-ladder tiers 1–3 + HasAns/NoAns F1 |
-| **T11** Verifier: veto, S1–S5, fusion, calibration, conformal | ✅ done | `tables/{fusion,calibration,conformal,verify_contrast,abstention_policies}.csv`, `figures/{reliability,risk_coverage}.png` | RQ5, RQ8, RQ8b |
-| **T11b** BanglaVerify + S3 | ✅ done | `banglaverify_{train,val,contrast}.jsonl`, `tables/banglaverify_{quality,sample}.csv`, `tables/s3_support.csv` | 500-pair contrast set held out and never trained on |
-| **T12** `pipeline.py` + 3-tab Streamlit | ✅ done | `src/bnqa/pipeline.py`, `app/streamlit_app.py` | the six-tuple, all three tabs, the VC-7 sidebar toggle |
-| **V1** Evidence receipts + `verify_receipt.py` | ✅ done | `reports/receipts/*.json`, `scripts/verify_receipt.py`, `tests/test_span_is_substring.py` | re-checkable offline, on the examiner's machine |
+| **T10** Reader: question type, candidates, feature span ranker | ✅ done | `tables/reader.csv`, `tables/reader_features.csv`, `tables/qtype.csv` | tier-2 F1 **0.227** (gbdt), question-type head **0.902**; candidate recall **0.472** is the binding ceiling |
+| **T11** Verifier: veto, S1–S5, fusion, calibration, conformal | 🟡 code done, **evaluation must re-run** | `tables/{fusion,calibration}.csv` written; `conformal`/`abstention_policies` **not yet** | fusion (RQ5) and the calibration study completed; the run then died on a pickling bug before conformal. Both are now fixed — see findings 15–16 |
+| **T11b** BanglaVerify + S3 | 🟡 code done, **must re-run** | `banglaverify_*.jsonl` regenerated; `tables/banglaverify_quality.csv` | the first build was invalid (finding #15); construction fixed and spot-checked, full build pending |
+| **T12** `pipeline.py` + 3-tab Streamlit | ✅ done | `src/bnqa/pipeline.py`, `app/streamlit_app.py` | the six-tuple, all three tabs, the VC-7 sidebar toggle; end-to-end ask + receipt verified |
+| **V1** Evidence receipts + `verify_receipt.py` | 🟡 code done, **not yet run at scale** | `scripts/verify_receipt.py`, `tests/test_span_is_substring.py` | the receipt round-trip and its tamper check pass in `pytest`; `reports/receipts/` is filled by T13 |
 | **V2** Offline mode + determinism | ✅ done | `src/bnqa/offline.py`, `tests/test_determinism_and_offline.py` | `BNQA_OFFLINE=1` raises on any outbound connection |
-| **V3** Counterfactual corpus test | ✅ done | `tables/counterfactual.csv`, `data/counterfactual/passages_tampered.jsonl` | CAR / AoRR |
-| **V4** Teacher audit sheet + model card | ✅ done | `tables/audit_sample.csv`, `MODEL_CARD.md` | hand this to the examiner on paper |
-| **T13** Evaluation pass → `results.json` | ✅ done | `reports/results.json`, `scripts/run_all.ps1` | regenerates from a clean run |
+| **V3** Counterfactual corpus test | 🟡 code done, **not yet run** | `scripts/run_counterfactual.py`, `bnqa/eval/counterfactual.py` | needs the fitted verifier, so it follows the T11 re-run |
+| **V4** Teacher audit sheet + model card | 🟡 code done, **not yet run** | `scripts/make_report_assets.py` | same dependency |
+| **T13** Evaluation pass → `results.json` | 🟡 partial | `reports/results.json`, `scripts/run_all.ps1` | T0–T7 and T10 are current and single-hash; T11 onward pending |
 | ~~G1–G3 Grading~~ | ❌ removed | | out of scope — PLAN.md §12 |
 
-**Tier A is complete.** Tier B (X1–X13) has not been started.
+**Where Tier A actually stands.** Every Tier-A component is written, committed
+and unit-tested (91 tests). T0–T7 and T10 have been run end to end at the 50k
+headline index and their numbers are in `reports/`. **T11 onward needs one more
+run**: the first attempt produced an invalid S3 dataset (finding #15) and then
+crashed on a pickling bug (finding #16). Both defects are fixed and verified on
+a reduced build; the full pass is `scripts/run_all.ps1` from T11 down, about an
+hour. Tier B (X1–X13) has not been started.
 
 ## Findings that changed the code
 
@@ -136,7 +142,7 @@ Every one of these was found by running the thing, not by planning it.
     the contradiction twice; term swap now ignores numeric tokens, which are
     not its job.
 
-13. **Candidate recall was 54%, and two of the four causes were bugs.**
+13. **Candidate recall is the reader's binding constraint.**
     Measured over train questions, the gold span was absent from the candidate
     set for nearly half of them — a hard ceiling on the reader that no amount
     of ranking could lift. Breakdown: gold sentence outside the top-3 (21%),
@@ -151,11 +157,74 @@ Every one of these was found by running the thing, not by planning it.
     (§7.5) that no 12-token n-gram can reach, so clause-shaped candidates are
     now generated whole for those classes.
 
-    The top-3-sentence limit is PLAN.md's own and was left alone. Candidate
-    recall is now a reported column in `reader.csv` rather than an invisible
-    ceiling.
+    The top-3-sentence limit is PLAN.md's own and was left alone. After the
+    fixes, candidate recall measured over the real retrieval output at 50k is
+    **0.472** — 1,585 of 3,000 training questions have no gold span among
+    their candidates and can teach the ranker nothing. That is a hard ceiling,
+    and it is why tier-2 token F1 is only **0.227** (GBDT; logreg 0.223,
+    strict EM 0.114). The reader is the weakest link in Tier A, the reason is
+    measured rather than guessed, and it is now a reported column in
+    `reader.csv` instead of an invisible ceiling.
 
-14. **`results.json` had accumulated three different config hashes**, some
+    The feature table behaves sensibly, which is the point of having one:
+    `cos_q_sentence` (+1.19) and `passage_rank_inv` (+0.99) are the strongest
+    positives, while `cos_q_span` (−0.69) and `span_in_question` (−0.37) are
+    negative — a span that merely echoes the question is usually wrong.
+
+14. **The retrieval hybrid does not pay off, and query expansion does nothing.**
+    On val at the 50k headline index: BM25 **0.891** Recall@5 at 0.53 ms/query
+    and 43.6 MB; `rrf(bm25+char)` **0.873** at 248.51 ms and 520 MB;
+    `tfidf-char` **0.801** at 244.51 ms and 476 MB. BM25 wins on quality *and*
+    costs two orders of magnitude less, so it is the shipped arm.
+
+    RRF *hurts* because rank fusion assumes its arms are comparable: folding a
+    0.801 arm into a 0.891 arm drags ranks down. Query expansion moves Recall@5
+    by 0.001, confirming finding #9. Index size behaves as §6.2B predicts —
+    every arm degrades from 10k to 50k, char TF-IDF worst (−10.0% relative),
+    BM25 most robust (−2.7%).
+
+    The NCTB control (finding #8) puts a bound on the remaining artefact:
+    dropping all 20,000 NCTB passages — 40% of the index — moves Recall@5 by
+    only **+0.0135**, so those passages are weak distractors but not free ones.
+
+15. **S3 scored 1.0000 on a contrast set built to be hard, and that was a bug
+    report rather than a result.** BanglaVerify paired each SUPPORTED claim
+    with the very sentence it was copied from, so **6,950 of 20,429 training
+    pairs were byte-identical strings**. The classifier learned
+    `statement == evidence` and got perfect accuracy for free — on a task the
+    pipeline never presents it with, because there the claim is an extracted
+    span and the evidence is a retrieved passage.
+
+    Claims are now judged against their **containing passage**. Identical pairs
+    fall to **0**, and the honest numbers on a reduced build are val **0.938**
+    (majority 0.409) and **contrast 0.728 against a 0.672 majority** — barely
+    above baseline, with CONTRADICTED recall only 0.610. That is exactly the
+    outcome §10.7 tells us to report rather than bury: on held-out minimal
+    pairs the lexical classifier is close to a similarity detector, **which is
+    the argument for the veto layer**, not against it.
+
+    The change also exposed that generator quality must be scored at sentence
+    level: checking a negated claim against a whole passage made the polarity
+    generator look like 0.750, because almost any passage contains a negation
+    somewhere. Scored against the sentence it was perturbed from — the
+    comparison the veto layer actually performs — it is **0.995**. The entity
+    generator sits at **0.872**, below PLAN.md §10.3's ~90% floor, and is
+    flagged rather than quietly kept.
+
+16. **The calibration study ran, then threw its own results away.** The fitted
+    calibrator held a lambda closure, so `pickle.dump` raised
+    `Can't get local object 'fit_calibrator.<locals>.<lambda>'` *after* all
+    four methods had been compared — taking the conformal threshold, the
+    policy comparison and the test pass down with it. Calibrators are now
+    plain picklable objects. The comparison itself was sound: Platt
+    **ECE 0.079**, isotonic 0.080, temperature 0.282, uncalibrated 0.291.
+
+    Fusion (RQ5) completed and is worth keeping: logreg **AUROC 0.729**, GBDT
+    0.722, **Naive Bayes 0.505 — chance**. The generative arm's independence
+    assumption is badly violated here, which is the measured answer to Sir's
+    Q5 rather than a paragraph about it.
+
+17. **`results.json` had accumulated three different config hashes**, some
     written on a different machine, and a stale row is indistinguishable from a
     current one by inspection — which is precisely what VC-12 exists to
     prevent. `stale_results()` names them, `prune_results()` removes them, and

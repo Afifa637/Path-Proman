@@ -594,36 +594,43 @@
         {
           "reader": "reader-logreg",
           "split": "val",
-          "index_size": 10000,
-          "retriever": "rrf(bm25+char)",
-          "n": 40,
-          "tier1_em": 0.1,
-          "tier2_token_f1": 0.1728,
-          "tier3_stem_syn_f1": 0.1728,
-          "n_hasans": 40,
+          "index_size": 50000,
+          "retriever": "bm25",
+          "candidate_recall_train": 0.4717,
+          "n": 800,
+          "tier1_em": 0.1037,
+          "tier2_token_f1": 0.2233,
+          "tier3_stem_syn_f1": 0.2263,
+          "n_hasans": 800,
           "n_noans": 0,
-          "hasans_f1": 0.1728,
+          "hasans_f1": 0.2233,
           "abstention_rate": 0.0
         },
         {
           "reader": "reader-gbdt",
           "split": "val",
-          "index_size": 10000,
-          "retriever": "rrf(bm25+char)",
-          "n": 40,
-          "tier1_em": 0.05,
-          "tier2_token_f1": 0.1682,
-          "tier3_stem_syn_f1": 0.1682,
-          "n_hasans": 40,
+          "index_size": 50000,
+          "retriever": "bm25",
+          "candidate_recall_train": 0.4717,
+          "n": 800,
+          "tier1_em": 0.1138,
+          "tier2_token_f1": 0.2268,
+          "tier3_stem_syn_f1": 0.2305,
+          "n_hasans": 800,
           "n_noans": 0,
-          "hasans_f1": 0.1682,
+          "hasans_f1": 0.2268,
           "abstention_rate": 0.0
         }
       ],
       "training": {
-        "skipped": 34,
-        "positives": 27,
-        "negatives": 1040
+        "skipped": 1585,
+        "positives": 2102,
+        "negatives": 56566,
+        "questions": 3000,
+        "usable_questions": 1415,
+        "candidate_recall": 0.4717,
+        "cand_sentences": 3,
+        "cand_ngram_max": 12
       },
       "qtype": {
         "n_train": 11912,
@@ -633,11 +640,11 @@
         "routes_list": 122,
         "routes_span": 1128
       },
-      "train_questions": 60,
-      "eval_questions": 40,
-      "config_hash": "325b04a5ded2",
+      "train_questions": 3000,
+      "eval_questions": 800,
+      "config_hash": "773e1b820203",
       "seed": 1337,
-      "written_at": "2026-09-19T09:44:43"
+      "written_at": "2026-09-19T11:23:30"
     }
   },
   "t6b_lexicon": {
@@ -711,6 +718,85 @@
       "config_hash": "773e1b820203",
       "seed": 1337,
       "written_at": "2026-09-19T10:51:00"
+    }
+  },
+  "t11b_banglaverify": {
+    "construction": {
+      "counts": {
+        "SUPPORTED": 774,
+        "CONTRADICTED": 768,
+        "NEUTRAL": 774
+      },
+      "by_generator": {
+        "date": 53,
+        "polarity": 404,
+        "entity": 234,
+        "numeral": 52,
+        "unit": 13,
+        "relation_order": 12
+      },
+      "generator_attempts": {
+        "date": 278,
+        "numeral": 268,
+        "polarity": 424,
+        "entity": 360,
+        "relation_order": 268,
+        "unit": 272
+      },
+      "splits": {
+        "train": 1745,
+        "val": 193,
+        "contrast": 378
+      },
+      "auto_quality": [
+        {
+          "generator": "numeral",
+          "n": 52,
+          "veto_detected": 50,
+          "veto_precision": 0.9615,
+          "meets_90pct_floor": true
+        },
+        {
+          "generator": "date",
+          "n": 53,
+          "veto_detected": 52,
+          "veto_precision": 0.9811,
+          "meets_90pct_floor": true
+        },
+        {
+          "generator": "unit",
+          "n": 13,
+          "veto_detected": 13,
+          "veto_precision": 1.0,
+          "meets_90pct_floor": true
+        },
+        {
+          "generator": "entity",
+          "n": 234,
+          "veto_detected": 204,
+          "veto_precision": 0.8718,
+          "meets_90pct_floor": false
+        },
+        {
+          "generator": "polarity",
+          "n": 404,
+          "veto_detected": 402,
+          "veto_precision": 0.995,
+          "meets_90pct_floor": true
+        },
+        {
+          "generator": "relation_order",
+          "n": 12,
+          "veto_detected": 12,
+          "veto_precision": 1.0,
+          "meets_90pct_floor": true
+        }
+      ],
+      "hand_sample": 247,
+      "license": "CC BY-NC-SA 4.0 (derivative of BanglaRQA)",
+      "config_hash": "773e1b820203",
+      "seed": 1337,
+      "written_at": "2026-09-19T14:25:52"
     }
   }
 }

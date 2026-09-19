@@ -76,13 +76,31 @@ def reliability_bins(p: np.ndarray, y: np.ndarray, bins: int = 10) -> list[dict]
 
 @dataclass
 class Calibrator:
+    """A fitted calibration map.
+
+    Deliberately **picklable**: the calibrator is saved to disk and reloaded by
+    the pipeline, so it holds a method name and a fitted object rather than a
+    closure.  An earlier version stored a lambda and died at ``pickle.dump``
+    with ``Can't get local object 'fit_calibrator.<locals>.<lambda>'`` — after
+    the whole calibration study had run.
+    """
+
     method: str
-    _fn: object = None
+    model: object = None          # temperature float, or a fitted sklearn model
 
     def __call__(self, p: np.ndarray) -> np.ndarray:
-        if self.method == "uncalibrated" or self._fn is None:
-            return np.clip(p, 1e-6, 1 - 1e-6)
-        return np.clip(self._fn(p), 1e-6, 1 - 1e-6)  # type: ignore[operator]
+        p = np.asarray(p, dtype=float)
+        if self.method == "uncalibrated" or self.model is None:
+            q = p
+        elif self.method == "temperature":
+            q = _sigmoid(_logit(p) / float(self.model))
+        elif self.method == "platt":
+            q = self.model.predict_proba(_logit(p).reshape(-1, 1))[:, 1]  # type: ignore[union-attr]
+        elif self.method == "isotonic":
+            q = self.model.predict(p)  # type: ignore[union-attr]
+        else:  # pragma: no cover - guarded by fit_calibrator
+            raise ValueError(f"unknown calibration method {self.method!r}")
+        return np.clip(q, 1e-6, 1 - 1e-6)
 
 
 def _logit(p: np.ndarray) -> np.ndarray:
@@ -101,30 +119,31 @@ def fit_calibrator(method: str, p: np.ndarray, y: np.ndarray) -> Calibrator:
     if method == "temperature":
         # One parameter, fitted by a coarse-to-fine sweep on NLL.  A scalar
         # temperature cannot change the ranking, only the spread — which is
-        # why it is the honest first thing to try.
+        # why it is the honest first thing to try.  Probabilities are clipped
+        # before the log: an exactly-0 or exactly-1 score makes the NLL -inf
+        # and every temperature then looks equally good.
         z = _logit(p)
         best_t, best_nll = 1.0, float("inf")
         for t in np.concatenate([np.linspace(0.05, 5.0, 100), np.linspace(0.5, 2.0, 150)]):
-            q = _sigmoid(z / t)
-            nll = -np.mean(y * np.log(q) + (1 - y) * np.log(1 - q))
+            q = np.clip(_sigmoid(z / t), 1e-9, 1 - 1e-9)
+            nll = float(-np.mean(y * np.log(q) + (1 - y) * np.log(1 - q)))
             if nll < best_nll:
-                best_t, best_nll = float(t), float(nll)
-        return Calibrator(method, lambda x, t=best_t: _sigmoid(_logit(x) / t))
+                best_t, best_nll = float(t), nll
+        return Calibrator(method, best_t)
 
     if method == "platt":
         from sklearn.linear_model import LogisticRegression
 
         lr = LogisticRegression(max_iter=1000, random_state=CFG.seed)
         lr.fit(_logit(p).reshape(-1, 1), y)
-        return Calibrator(method,
-                          lambda x, m=lr: m.predict_proba(_logit(x).reshape(-1, 1))[:, 1])
+        return Calibrator(method, lr)
 
     if method == "isotonic":
         from sklearn.isotonic import IsotonicRegression
 
         iso = IsotonicRegression(out_of_bounds="clip", y_min=0.0, y_max=1.0)
         iso.fit(p, y)
-        return Calibrator(method, lambda x, m=iso: m.predict(x))
+        return Calibrator(method, iso)
 
     raise ValueError(f"unknown calibration method {method!r}")
 

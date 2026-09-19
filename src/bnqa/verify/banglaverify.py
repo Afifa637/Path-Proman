@@ -7,12 +7,17 @@ detector §10.7 says we must not ship.  So the CONTRADICTED half is built by
 **minimal-pair perturbation** — swap exactly one critical token, keep every
 other token identical — with one generator per veto category.
 
+Every item is a **(claim, evidence-passage)** pair.  The claim is a gold
+sentence; the evidence is a passage.  Pairing a claim against its own sentence
+would make SUPPORTED a string-equality test — see :func:`_evidence` for the
+bug that caused and why it scored 1.0000.
+
 ===============  =============================================  =====
 label            construction                                   ~size
 ===============  =============================================  =====
-SUPPORTED        (evidence sentence, answer) from aligned gold   ~12k
-CONTRADICTED     six minimal-pair generators, one per category   ~12k
-NEUTRAL          BM25-retrieved topical passage lacking answer   ~12k
+SUPPORTED        gold sentence + its own containing passage      ~8k
+CONTRADICTED     six minimal-pair generators, one per category   ~8k
+NEUTRAL          same claim + a different passage                ~8k
 ===============  =============================================  =====
 
 Quality control, because this is constructed data and an examiner will press
@@ -65,6 +70,13 @@ class Item:
     pid: str
     swapped_from: str = ""
     swapped_to: str = ""
+    # The unperturbed claim, kept only on CONTRADICTED items.  auto_quality
+    # scores each generator against *this*, not against the whole passage,
+    # because that is the comparison the veto layer actually performs in the
+    # pipeline (answer vs its evidence sentence).  Checking a negated sentence
+    # against a long passage is meaningless: almost every passage contains a
+    # negation somewhere, so the polarity rule never fires.
+    source_statement: str = ""
 
     def as_dict(self) -> dict:
         return dict(self.__dict__)
@@ -241,15 +253,28 @@ def _evidence_sentence(context: str, start: int, end: int) -> tuple[str, int, in
     return None
 
 
-def _statement(evidence: str, answer: str) -> str:
-    """The 'answer statement' a support model judges.
+MAX_EVIDENCE_CHARS = 1_200
 
-    Tier A has no generation, so the statement *is* the evidence sentence with
-    the answer in it — which is exactly right for a minimal-pair dataset: the
-    perturbation then changes one token of a real sentence rather than of a
-    template we invented.
+
+def _evidence(passage: str) -> str:
+    """What the claim is judged *against* — the passage, not the sentence.
+
+    **This is the fix for a construction flaw that made S3 meaningless.**  The
+    first version paired each SUPPORTED statement with the very sentence it was
+    copied from, so 6,950 of 20,429 training pairs were byte-identical strings
+    and the classifier scored 1.0000 on val *and* on the held-out contrast set
+    by learning ``statement == evidence``.  A perfect score on a contrast set
+    designed to be hard is a bug report, not a result: it meant S3 had learned
+    string equality, which the pipeline never presents it with, because there
+    the statement is an extracted span and the evidence is a retrieved passage.
+
+    Pairing the sentence against its **containing passage** restores the task
+    §10.3 actually describes: SUPPORTED is verbatim-contained, CONTRADICTED
+    differs from something in the passage by exactly one token, and NEUTRAL is
+    a claim the passage does not discuss.  The SUPPORTED/CONTRADICTED boundary
+    is then the minimal-pair signal the model is supposed to learn.
     """
-    return evidence
+    return passage[:MAX_EVIDENCE_CHARS]
 
 
 def build(limit: int | None = None) -> dict:
@@ -280,13 +305,13 @@ def build(limit: int | None = None) -> dict:
             if not found:
                 continue
             sent = found[0]
-            supported.append(Item(evidence=sent, statement=_statement(sent, ans["text"]),
+            supported.append(Item(evidence=_evidence(context), statement=sent,
                                   label=SUPPORTED, generator="gold", qid=row["qid"],
                                   pid=row["gold_passage_id"]))
             break
     print(f"  SUPPORTED   {len(supported):,d} from aligned gold spans")
 
-    pools = ValuePools([it.evidence for it in supported])
+    pools = ValuePools([it.statement for it in supported])
     print(f"  value pools: {len(pools.years):,d} years, {len(pools.numbers):,d} numbers, "
           f"{len(pools.units):,d} units, {len(pools.entities):,d} entities")
 
@@ -306,7 +331,8 @@ def build(limit: int | None = None) -> dict:
                 continue
             contradicted.append(Item(evidence=it.evidence, statement=new_statement,
                                      label=CONTRADICTED, generator=gname, qid=it.qid,
-                                     pid=it.pid, swapped_from=old, swapped_to=new))
+                                     pid=it.pid, swapped_from=old, swapped_to=new,
+                                     source_statement=it.statement))
             break
     by_gen = Counter(i.generator for i in contradicted)
     print(f"  CONTRADICTED {len(contradicted):,d} minimal pairs  {dict(by_gen)}")
@@ -324,6 +350,8 @@ def build(limit: int | None = None) -> dict:
         neutral.append(Item(evidence=other.evidence, statement=it.statement,
                             label=NEUTRAL, generator="cross_passage", qid=it.qid,
                             pid=other.pid))
+        # (evidence is another passage, so the claim is one this passage does
+        #  not discuss — topically close, never contradicted)
     print(f"  NEUTRAL     {len(neutral):,d} cross-passage pairs")
 
     items = supported + contradicted + neutral
@@ -417,7 +445,8 @@ def auto_quality(contradicted: Sequence[Item]) -> list[dict]:
         group = by_gen.get(gen, [])
         if not group:
             continue
-        hits = sum(1 for it in group if check(it.statement, it.evidence).fired)
+        hits = sum(1 for it in group
+                   if check(it.statement, it.source_statement or it.evidence).fired)
         rows.append({"generator": gen, "n": len(group),
                      "veto_detected": hits,
                      "veto_precision": round(hits / len(group), 4),
