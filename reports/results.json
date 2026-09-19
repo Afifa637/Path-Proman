@@ -45,9 +45,9 @@
       "span_reader_viable": true,
       "multispan_separator": ";",
       "duplicate_qids_disambiguated": 7,
-      "config_hash": "325b04a5ded2",
+      "config_hash": "773e1b820203",
       "seed": 1337,
-      "written_at": "2026-09-19T09:57:37"
+      "written_at": "2026-09-19T10:47:03"
     }
   },
   "t2_nctb": {
@@ -63,9 +63,9 @@
       },
       "bangla_textbook_kept": 40000,
       "total": 83359,
-      "config_hash": "325b04a5ded2",
+      "config_hash": "773e1b820203",
       "seed": 1337,
-      "written_at": "2026-09-19T09:58:45"
+      "written_at": "2026-09-19T10:47:39"
     }
   },
   "t3_wiki": {
@@ -78,9 +78,9 @@
         180
       ],
       "chunk_overlap": 30,
-      "config_hash": "325b04a5ded2",
+      "config_hash": "773e1b820203",
       "seed": 1337,
-      "written_at": "2026-09-19T10:00:35"
+      "written_at": "2026-09-19T10:48:45"
     }
   },
   "t3_index": {
@@ -119,7 +119,7 @@
       "gold_at_every_size": true,
       "config_hash": "773e1b820203",
       "seed": 1337,
-      "written_at": "2026-09-19T10:03:53"
+      "written_at": "2026-09-19T10:50:45"
     },
     "audit": {
       "total_passages": 50000,
@@ -189,7 +189,7 @@
       },
       "config_hash": "773e1b820203",
       "seed": 1337,
-      "written_at": "2026-09-19T10:04:10"
+      "written_at": "2026-09-19T10:50:58"
     }
   },
   "t6b_resources": {
@@ -464,6 +464,43 @@
       "config_hash": "773e1b820203",
       "seed": 1337,
       "written_at": "2026-09-19T10:43:50"
+    },
+    "length_control": {
+      "rows": [
+        {
+          "retriever": "bm25",
+          "n_queries": 1484,
+          "recall@1": 0.7493261455525606,
+          "recall@5": 0.878032345013477,
+          "recall@10": 0.9117250673854448,
+          "mrr@10": 0.8076410281093573,
+          "ndcg@10": 0.8330124180704392,
+          "found@10": 0.9117250673854448,
+          "arm": "bm25/full",
+          "index_size": 50000,
+          "passages": 50000,
+          "bm25_k1": 1.2,
+          "bm25_b": 0.75
+        },
+        {
+          "retriever": "bm25",
+          "n_queries": 1484,
+          "recall@1": 0.7648247978436657,
+          "recall@5": 0.8915094339622641,
+          "recall@10": 0.9211590296495957,
+          "mrr@10": 0.8218438476019337,
+          "ndcg@10": 0.8461146344434823,
+          "found@10": 0.9211590296495957,
+          "arm": "bm25/gold+wiki",
+          "index_size": 50000,
+          "passages": 30000,
+          "bm25_k1": 1.2,
+          "bm25_b": 0.75
+        }
+      ],
+      "config_hash": "773e1b820203",
+      "seed": 1337,
+      "written_at": "2026-09-19T10:52:57"
     }
   },
   "t7_topics": {
@@ -673,7 +710,7 @@
       "coverage_gap_is_tier_b_target": true,
       "config_hash": "773e1b820203",
       "seed": 1337,
-      "written_at": "2026-09-19T10:06:50"
+      "written_at": "2026-09-19T10:51:00"
     }
   }
 }

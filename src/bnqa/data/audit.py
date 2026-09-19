@@ -110,7 +110,7 @@ def length_artefact(passages: list[dict]) -> dict:
     sources = np.array([p["source"] for p in passages])
     per_source = {}
     for src in sorted(set(sources) - {"gold"}):
-        per_source[src] = round(_auc((sources == src) | (sources == "gold")), 4)
+        per_source[str(src)] = round(_auc((sources == src) | (sources == "gold")), 4)
 
     # The distractor pool we *control* is Wikipedia: its chunk lengths are
     # sampled from the gold distribution precisely so this number is chance.
