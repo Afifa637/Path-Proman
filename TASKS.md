@@ -3,6 +3,10 @@
 Status of the tasks in `PLAN.md` §14. One task at a time; **done** means the
 task's *Done when* criterion in PLAN.md §14 is met and the artefact exists.
 
+Every number below is also in `reports/tables/` or `reports/results.json`,
+written by an evaluation script and stamped with the config hash and seed that
+produced it (VC-12). Nothing here is typed by hand from memory.
+
 | Task | Status | Artefacts | Notes |
 |---|---|---|---|
 | **T0** Repo skeleton, config, seeds, env | ✅ done | `src/bnqa/`, `config.py`, `reports/env.json`, `requirements-core.txt` | Tier A installs with **no torch / transformers / gensim** |
@@ -10,14 +14,21 @@ task's *Done when* criterion in PLAN.md §14 is met and the artefact exists.
 | **T2** NCTB textbook ingest | ✅ done | `nctb_passages.jsonl`, `tables/nctb_ingest.csv`, `data/sources.csv` | 43,359 SchoolText passages, grades 6–10, 32 subjects |
 | **T3** Index assembly + dedup + audit | ✅ done | `passages.jsonl`, `index_{10,50}k.manifest.json`, `tables/corpus_audit.csv` | nested, all 3,000 gold at both sizes, 20,000 citable NCTB passages |
 | **T4** Normalisation, tokeniser, stopwords, stemmer | ✅ done | `bnqa/preprocess/` | idempotent; stemmer is corpus-validated |
-| **T5** Sparse retrieval (TF-IDF word/char, our BM25) | ✅ done | `bnqa/retrieval/`, `tables/retrieval.csv` | BM25 validated against a hand-worked example |
-| **T6b** Lexical resources + probe | ✅ done | `resources/{suffixes,synonyms,variants,synonym_probe}`, `tables/synonym_probe.csv` | precision **1.000**, recall **0.714** on held-out pairs |
-| **T7** RRF hybrid, query expansion, index-size comparison, topics | ✅ done | `tables/retrieval.csv`, `tables/retrieval_index_size.csv`, `figures/topics_50k.png` | RQ1 answered on val at both sizes |
-| T10 Reader | ⬜ next | | |
-| T11 Verifier + T11b BanglaVerify | ⬜ | | |
-| T12 Pipeline + 3-tab Streamlit | ⬜ | | |
-| V1–V4 Verifiability | ⬜ | | |
+| **T5** Sparse retrieval (TF-IDF word/char, our BM25) | ✅ done | `bnqa/retrieval/`, `tables/retrieval.csv` | BM25 validated against a hand-worked example in `pytest` |
+| **T6b** Lexical resources + probe | ✅ done | `resources/{suffixes,synonyms,variants,synonym_probe}`, `tables/synonym_probe.csv` | precision **1.000** (0 false merges on 29 hard negatives), recall **0.714** |
+| **T7** RRF hybrid, query expansion, index-size comparison, topics | ✅ done | `tables/retrieval.csv`, `tables/retrieval_index_size.csv`, `tables/retrieval_length_control.csv`, `figures/topics_50k.png` | RQ1 answered on val at both sizes |
+| **T10** Reader: question type, candidates, feature span ranker | ✅ done | `tables/reader.csv`, `tables/reader_features.csv`, `tables/qtype.csv` | metric-ladder tiers 1–3 + HasAns/NoAns F1 |
+| **T11** Verifier: veto, S1–S5, fusion, calibration, conformal | ✅ done | `tables/{fusion,calibration,conformal,verify_contrast,abstention_policies}.csv`, `figures/{reliability,risk_coverage}.png` | RQ5, RQ8, RQ8b |
+| **T11b** BanglaVerify + S3 | ✅ done | `banglaverify_{train,val,contrast}.jsonl`, `tables/banglaverify_{quality,sample}.csv`, `tables/s3_support.csv` | 500-pair contrast set held out and never trained on |
+| **T12** `pipeline.py` + 3-tab Streamlit | ✅ done | `src/bnqa/pipeline.py`, `app/streamlit_app.py` | the six-tuple, all three tabs, the VC-7 sidebar toggle |
+| **V1** Evidence receipts + `verify_receipt.py` | ✅ done | `reports/receipts/*.json`, `scripts/verify_receipt.py`, `tests/test_span_is_substring.py` | re-checkable offline, on the examiner's machine |
+| **V2** Offline mode + determinism | ✅ done | `src/bnqa/offline.py`, `tests/test_determinism_and_offline.py` | `BNQA_OFFLINE=1` raises on any outbound connection |
+| **V3** Counterfactual corpus test | ✅ done | `tables/counterfactual.csv`, `data/counterfactual/passages_tampered.jsonl` | CAR / AoRR |
+| **V4** Teacher audit sheet + model card | ✅ done | `tables/audit_sample.csv`, `MODEL_CARD.md` | hand this to the examiner on paper |
+| **T13** Evaluation pass → `results.json` | ✅ done | `reports/results.json`, `scripts/run_all.ps1` | regenerates from a clean run |
 | ~~G1–G3 Grading~~ | ❌ removed | | out of scope — PLAN.md §12 |
+
+**Tier A is complete.** Tier B (X1–X13) has not been started.
 
 ## Findings that changed the code
 
@@ -40,7 +51,7 @@ Every one of these was found by running the thing, not by planning it.
    They differ whenever alignment was whitespace-tolerant or fuzzy, which made
    VC-1's substring assertion false for exactly those spans.
 
-3. **`class` is the string `"9-10"`** for the combined Nine–Ten book — 27,059
+3. **`class` is the string `"9-10"`** for the combined Nine–Ten book — 23,004
    records, the largest and most demo-relevant slice of NCTB-SchoolText. A naive
    `int()` cast dropped every one of them silently.
 
@@ -61,40 +72,118 @@ Every one of these was found by running the thing, not by planning it.
    only — no cross-split leakage). Disambiguated with a `#n` suffix; `source_qid`
    keeps the original.
 
-8. **The index had a length artefact, and it was ours.** Chunking Wikipedia to a
-   fixed 120–180 tokens while leaving BanglaRQA contexts whole made the two
-   trivially separable: **passage length alone predicted "is gold" at AUC 0.795**.
-   That is exactly the distribution artefact PLAN.md §6.2B warns about, and it is
-   not cosmetic — BM25's `b` tunes length normalisation directly, and on the
-   broken index it tuned to `b=0.3` (weak normalisation, which favours long
-   documents, which were the gold ones). Sampling each distractor's target length
-   from the gold distribution and dropping short tails took it to **AUC 0.545**,
-   essentially chance. The index was rebuilt and every retrieval number re-run.
+8. **The index had a length artefact, it was ours, and only half of it is
+   fixable.** Chunking Wikipedia to a fixed 120–180 tokens while leaving
+   BanglaRQA contexts whole once made the two trivially separable: **passage
+   length alone predicted "is gold" at AUC 0.795**. Sampling each distractor's
+   target length from the gold distribution fixed that, and it stays fixed —
+   the audit now measures it on every build and Wikipedia sits at **AUC 0.546**,
+   essentially chance.
 
-9. **The hand-authored lexicon covers 1.54% of question tokens**, so query
-   expansion fires on 8.2% of queries and changes nothing measurable. This is the
-   honest Tier-A baseline that Tier B's induced synonyms (X3) have to beat — it
-   makes RQ-A measurable rather than rhetorical.
+   But the *overall* figure is **0.726**, because NCTB-SchoolText separates at
+   **AUC 0.968**: its passages are natively much shorter (median 57 tokens
+   against gold's 203) and T3 deliberately keeps its own chunking, because that
+   chunking is what carries the grade/subject/chapter metadata VC-2 cites.
+   There is no fix that does not destroy the citation unit, so the number is
+   reported instead of removed, per source rather than pooled.
 
-10. **The synonym probe was circular** until held-out pairs were added. Every
-    positive had been copied from the lexicon, so recall was 1.0 by construction.
-    With 12 genuine Bangla doublets the lexicon has never seen, the honest
-    numbers are **precision 1.000, recall 0.714**.
+   **It is not cosmetic, and we now know what it is worth.** BM25's `b` tunes
+   length normalisation directly, and it tunes toward weak normalisation — which
+   favours long documents, which are the gold ones — at *every* `k1`. Mean
+   Recall@5 at `b=0.3` versus `b=0.9` is **+0.0088 at 10k** and **+0.0187 at
+   50k**, the gap growing with NCTB's share of the index. `run_retrieval.py
+   --control-only` re-runs BM25 with NCTB removed so the headline can be read
+   beside a task whose distractors are known to be distributionally matched.
+
+9. **The hand-authored lexicon barely fires.** Query expansion changes Recall@5
+   by less than a point, because the T6b lexicon is curriculum-domain and
+   BanglaRQA's questions are Wikipedia-domain. This is the honest Tier-A
+   baseline that Tier B's induced synonyms (X3) have to beat — it makes RQ-A
+   measurable rather than rhetorical.
+
+10. **The synonym probe was circular, and the fix needs stating carefully.**
+    Every positive had been copied from the lexicon, so recall was 1.0 by
+    construction. With held-out Bangla doublets added, the honest numbers are
+    **precision 1.000 (0 false merges across 29 hard negatives — antonyms and
+    co-hyponyms the veto layer must also keep apart) and recall 0.714**.
+
+    The pairs whose terms the lexicon has *never seen* score 0.000 recall, and
+    reporting that as a result would be theatre: equivalence is a union-find
+    lookup, so those pairs cannot match **by definition**. That row is labelled
+    as what it actually measures — the coverage a 56-pair hand list does not
+    reach, which is exactly the gap X3 must close on the same probe.
+
+11. **The veto layer missed the plan's own flagship contradiction.** PLAN.md
+    §10.1 row 1 is *উদ্ভিদ **অক্সিজেন** গ্রহণ করে* against *উদ্ভিদ **কার্বন
+    ডাই-অক্সাইড** গ্রহণ করে*. Neither substance is a proper noun, so the
+    rule-based entity proxy never reached it, and every soft metric scores the
+    pair at ≈1.0 — the exact failure the veto layer exists to prevent.
+
+    Fixed with an **exact minimal-pair term-swap test**: set arithmetic over
+    content tokens, firing only when the two strings are otherwise near-copies.
+    No edit distance and no n-gram overlap, so the isolation guarantee in
+    §10.2 holds and `tests/test_veto_isolation.py` asserts it. It consults the
+    T6b synonym classes first, so a genuine paraphrase (বায়ুমণ্ডল / আবহমণ্ডল) is
+    **not** vetoed. BanglaVerify's entity generator was extended the same way,
+    because a generator restricted to proper nouns could never produce the pair
+    the detector most needs to be trained against.
+
+12. **Two follow-on veto bugs, both found by asking real questions.** The
+    gazetteer is harvested from passage titles, so four-digit years leak into
+    it and a swapped year was reported as *নাম ভুল* — "wrong name" — for a
+    date. Numbers are now excluded from the entity proxy. With that fixed, the
+    date rule and the term-swap rule both fired on the same year and printed
+    the contradiction twice; term swap now ignores numeric tokens, which are
+    not its job.
+
+13. **Candidate recall was 54%, and two of the four causes were bugs.**
+    Measured over train questions, the gold span was absent from the candidate
+    set for nearly half of them — a hard ceiling on the reader that no amount
+    of ranking could lift. Breakdown: gold sentence outside the top-3 (21%),
+    **span starts or ends on a stopword (12%)**, **span longer than 12 tokens
+    (9%)**, type filter (3%).
+
+    The middle two were wrong. Rejecting stopword-edged spans looked sensible
+    and simply deleted correct answers, because Bangla answers routinely start
+    with a determiner or end with a case particle; the ranker already carries
+    `starts_with_stopword` and `stopword_frac`, and a feature it can weigh
+    beats a filter it cannot appeal. And REASON/PROCESS answers are *clauses*
+    (§7.5) that no 12-token n-gram can reach, so clause-shaped candidates are
+    now generated whole for those classes.
+
+    The top-3-sentence limit is PLAN.md's own and was left alone. Candidate
+    recall is now a reported column in `reader.csv` rather than an invisible
+    ceiling.
+
+14. **`results.json` had accumulated three different config hashes**, some
+    written on a different machine, and a stale row is indistinguishable from a
+    current one by inspection — which is precisely what VC-12 exists to
+    prevent. `stale_results()` names them, `prune_results()` removes them, and
+    the last step of `run_all.ps1` reports what it dropped.
 
 ## Commands
 
 ```powershell
 . .\scripts\env.ps1                        # UTF-8 console + PYTHONPATH + HF_HOME
+.\scripts\run_all.ps1                      # everything, from a clean checkout
+.\scripts\run_all.ps1 -Quick               # ten-minute wiring check
 
-python -m bnqa.envinfo                     # T0  -> reports/env.json
+python -m bnqa.envinfo                     # T0   -> reports/env.json
 python -m bnqa.data.fetch                  # download the Tier A corpora (~550 MB)
 python -m bnqa.data.banglarqa              # T1
 python -m bnqa.data.nctb_text              # T2
-python -m bnqa.data.wiki                   # T3a length-matched distractors
-python -m bnqa.data.index_build            # T3  nested indexes
-python -m bnqa.data.audit                  # T3  corpus audit
+python -m bnqa.data.wiki                   # T3a  length-matched distractors
+python -m bnqa.data.index_build            # T3   nested indexes
+python -m bnqa.data.audit                  # T3   corpus audit + length artefact
 python -m bnqa.eval.lexicon_probe          # T6b
 python scripts/run_retrieval.py            # T5 + T7
-python -m bnqa.eval.topics                 # T7  topic figure
-pytest                                     # all invariants
+python scripts/run_retrieval.py --control-only   # T7 length-artefact control
+python -m bnqa.eval.topics                 # T7   topic figure
+python scripts/run_reader.py               # T10
+python scripts/run_verify.py               # T11 + T11b
+python scripts/run_counterfactual.py       # V3
+python scripts/make_report_assets.py       # V1 + V4 + T13
+python scripts/verify_receipt.py           # VC-3, on any machine
+pytest                                     # all 91 invariants
+streamlit run app/streamlit_app.py         # T12
 ```
