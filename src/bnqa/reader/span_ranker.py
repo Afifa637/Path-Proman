@@ -181,13 +181,19 @@ class FeatureReader:
              question_type: str | None = None, top_k_report: int = 5) -> Answer:
         return self.read_with_ensemble(question, passages, ranks=ranks,
                                        question_type=question_type,
-                                       top_k_report=top_k_report)[0]
+                                       top_k_report=top_k_report,
+                                       with_ensemble=False)[0]
 
     def read_with_ensemble(self, question: str, passages: Sequence[dict], *,
                            ranks: Sequence[tuple[int, float]] | None = None,
-                           question_type: str | None = None,
-                           top_k_report: int = 5) -> tuple[Answer, list[Answer]]:
-        """``(answer, ensemble_answers)`` — S5 for the price of one read."""
+                           question_type: str | None = None, top_k_report: int = 5,
+                           with_ensemble: bool = True) -> tuple[Answer, list[Answer]]:
+        """``(answer, ensemble_answers)`` — S5 for the price of one read.
+
+        ``with_ensemble=False`` is the plain ``read`` path: S4's independent
+        per-passage rereads do not need the bags, and scoring them there would
+        multiply the verifier's work for a signal nobody reads.
+        """
         qa = self.analyse(question, question_type)
         cands = generate(question, passages, expected_class=qa.expected_class, ranks=ranks)
         if not cands:
@@ -236,7 +242,7 @@ class FeatureReader:
         # S5: each bagged ranker picks from the same candidates.  Only the
         # chosen span matters to the signal, so nothing else is rebuilt.
         bag_answers: list[Answer] = []
-        for bag in self.ensemble:
+        for bag in (self.ensemble if with_ensemble else ()):
             bag_scores = bag.rank(cands, X)
             if not len(bag_scores):
                 continue

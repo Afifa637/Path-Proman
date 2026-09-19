@@ -45,7 +45,8 @@ from .utils import read_json, sha256_text
 from .verify.conformal import ConformalThreshold
 from .verify.constraints import VetoResult, check as veto_check
 from .verify.receipt import build_receipt, write_receipt
-from .verify.signals import SignalContext, compute_all, fusion_features, to_matrix
+from .verify.signals import (SIGNAL_NAMES, SignalContext, fusion_features,
+                             to_matrix)
 from .verify.threshold import Decision, decide
 
 # --------------------------------------------------------------------------- #
@@ -218,9 +219,12 @@ class BanglaQA:
                             passages=passages, alt_answers=alt, ensemble_answers=ens,
                             support_model=self.support_model, gazetteer=self.gazetteer)
 
-        signals = compute_all(ctx)
+        # One pass: the fusion features are a superset of the five signals, so
+        # computing them separately would run S3 and S4 twice per question.
+        feats = fusion_features(ctx)
+        signals = {k: feats[k] for k in SIGNAL_NAMES}
         veto = veto_check(answer.text, evidence, gazetteer=self.gazetteer)
-        confidence = self._confidence(ctx, signals, veto)
+        confidence = self._confidence(feats, signals, veto)
         decision = decide(confidence, veto, policy=policy, threshold=self.conformal,
                           signals=signals)
 
@@ -267,8 +271,9 @@ class BanglaQA:
         ctx = SignalContext(question=question, answer=probe, evidence=evidence,
                             passages=passages, support_model=self.support_model,
                             gazetteer=self.gazetteer)
-        signals = compute_all(ctx)
-        confidence = self._confidence(ctx, signals, veto)
+        feats = fusion_features(ctx)
+        signals = {k: feats[k] for k in SIGNAL_NAMES}
+        confidence = self._confidence(feats, signals, veto)
         label = None
         if self.support_model is not None:
             label = self.support_model.predict_label(candidate, evidence)
@@ -295,7 +300,7 @@ class BanglaQA:
             return self.conformal.tau
         return 0.5
 
-    def _confidence(self, ctx: SignalContext, signals: dict, veto: VetoResult) -> float:
+    def _confidence(self, feats: dict, signals: dict, veto: VetoResult) -> float:
         """Fused, calibrated, then capped by the veto layer — in that order.
 
         The cap is applied **last** on purpose: a calibrator fitted on fused
@@ -306,7 +311,6 @@ class BanglaQA:
         if self.fusion_model is not None:
             import numpy as np
 
-            feats = fusion_features(ctx)
             raw = float(self.fusion_model.predict_proba(to_matrix([feats]))[0])
             if self.calibrator is not None:
                 raw = float(self.calibrator(np.asarray([raw]))[0])

@@ -205,7 +205,12 @@ def entities(text: str, *, gazetteer: frozenset[str] | None = None) -> set[str]:
             out.add(toks[i + 1])
         elif gazetteer and tok in gazetteer:
             out.add(tok)
-    return out
+    # A number is never an entity.  Years and quantities have their own rules
+    # above, and letting one through here produces "নাম ভুল" ("wrong name")
+    # for a date — which is both wrong and, in the UI, actively confusing.
+    # The gazetteer is harvested from passage titles, so four-digit years leak
+    # into it easily.
+    return {e for e in out if not e.replace(".", "").replace(",", "").isdigit()}
 
 
 def polarity(text: str) -> bool:
@@ -216,6 +221,10 @@ def polarity(text: str) -> bool:
     """
     toks = set(tokenize(normalize(text)))
     return not bool(toks & NEGATION)
+
+
+def _is_number(token: str) -> bool:
+    return token.replace(".", "").replace(",", "").isdigit()
 
 
 MIN_SWAP_TOKENS = 4          # raw tokens, not content tokens — see term_swap
@@ -253,8 +262,11 @@ def term_swap(answer: str, evidence: str) -> tuple[str, str] | None:
     a_set = set(content_tokens(tokenize(answer)))
     e_set = set(content_tokens(tokenize(evidence)))
     shared = a_set & e_set
-    only_a = sorted(a_set - e_set)
-    only_e = sorted(e_set - a_set)
+    # Numbers belong to the date and numeral rules, which have already run and
+    # produce a better message.  Reporting the same swapped year twice — once
+    # as "সাল ভুল" and again as "শব্দ ভুল" — is noise in the UI.
+    only_a = sorted(t for t in a_set - e_set if not _is_number(t))
+    only_e = sorted(t for t in e_set - a_set if not _is_number(t))
 
     if len(shared) < MIN_SWAP_SHARED:
         return None

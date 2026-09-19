@@ -117,9 +117,9 @@
       },
       "nested": true,
       "gold_at_every_size": true,
-      "config_hash": "e696128368de",
+      "config_hash": "773e1b820203",
       "seed": 1337,
-      "written_at": "2026-09-19T04:44:53"
+      "written_at": "2026-09-19T10:03:53"
     },
     "audit": {
       "total_passages": 50000,
@@ -175,9 +175,21 @@
         }
       },
       "sample_per_source": 200,
-      "config_hash": "e696128368de",
+      "length_artefact": {
+        "auc_overall": 0.726,
+        "auc_by_source": {
+          "nctb_schooltext": 0.9683,
+          "wiki": 0.5465
+        },
+        "auc_vs_wiki": 0.5465,
+        "chance": 0.5,
+        "threshold": 0.6,
+        "clean": true,
+        "verdict": "wiki distractors are length-matched (chance); NCTB is shorter by construction and is reported separately"
+      },
+      "config_hash": "773e1b820203",
       "seed": 1337,
-      "written_at": "2026-09-19T04:45:24"
+      "written_at": "2026-09-19T10:04:10"
     }
   },
   "t6b_resources": {
@@ -444,6 +456,79 @@
       "config_hash": "325b04a5ded2",
       "seed": 1337,
       "written_at": "2026-09-19T09:44:43"
+    }
+  },
+  "t6b_lexicon": {
+    "probe": {
+      "probe": [
+        {
+          "subset": "all",
+          "note": "the headline: precision is the number that matters",
+          "n": 71,
+          "tp": 30,
+          "fp": 0,
+          "fn": 12,
+          "tn": 29,
+          "precision": 1.0,
+          "recall": 0.7143,
+          "f1": 0.8333,
+          "accuracy": 0.831
+        },
+        {
+          "subset": "in_lexicon",
+          "note": "recall is 1.0 by construction — read precision only",
+          "n": 51,
+          "tp": 30,
+          "fp": 0,
+          "fn": 0,
+          "tn": 21,
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0,
+          "accuracy": 1.0
+        },
+        {
+          "subset": "unseen_pairs",
+          "note": "coverage bound: unreachable by construction, and the gap Tier B (X3) must close",
+          "n": 20,
+          "tp": 0,
+          "fp": 0,
+          "fn": 12,
+          "tn": 8,
+          "precision": 1.0,
+          "recall": 0.0,
+          "f1": 0.0,
+          "accuracy": 0.4
+        }
+      ],
+      "lexicon": {
+        "pairs_total": 80,
+        "pairs_reviewed": 56,
+        "pairs_unreviewed": 24,
+        "terms_in_classes": 111,
+        "classes": 56,
+        "domains": [
+          "biology",
+          "civics",
+          "economics",
+          "general",
+          "geography",
+          "history",
+          "math",
+          "science"
+        ]
+      },
+      "variant_kinds": {
+        "english": 21,
+        "compound": 15,
+        "translit": 10
+      },
+      "unseen_positives": 12,
+      "positives": 42,
+      "coverage_gap_is_tier_b_target": true,
+      "config_hash": "773e1b820203",
+      "seed": 1337,
+      "written_at": "2026-09-19T10:06:50"
     }
   }
 }
