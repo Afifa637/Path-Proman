@@ -50,8 +50,20 @@ QA_VAL = PROCESSED / "qa_val.jsonl"
 QA_TEST = PROCESSED / "qa_test.jsonl"
 INDEX_MANIFEST = {n: PROCESSED / f"index_{n // 1000}k.manifest.json" for n in (10_000, 50_000)}
 
+# fitted Tier-A models.  Small (a few MB) but derived, so they live under
+# data/processed/ and are gitignored: VC-11 says they are regenerated from a
+# clean run, not shipped.
+MODELS = PROCESSED / "models"
+READER_MODEL = MODELS / "reader_logreg.pkl"
+READER_GBDT_MODEL = MODELS / "reader_gbdt.pkl"
+QTYPE_MODEL = MODELS / "qtype.pkl"
+SUPPORT_MODEL = MODELS / "s3_support.pkl"
+FUSION_MODEL = MODELS / "fusion.pkl"
+CALIBRATOR = MODELS / "calibrator.pkl"
+CONFORMAL_JSON = MODELS / "conformal.json"
+
 ALL_DIRS = [
-    DATA, RAW, PROCESSED, COUNTERFACTUAL,
+    DATA, RAW, PROCESSED, COUNTERFACTUAL, MODELS,
     RAW_BANGLARQA, RAW_NCTB, RAW_TEXTBOOK, RAW_WIKI, RAW_BCORE,
     REPORTS, FIGURES, TABLES, RECEIPTS,
 ]
@@ -144,12 +156,36 @@ class Config:
     cand_sentences: int = 3
     cand_ngram_max: int = 12
     span_max_tokens: int = 30
+    # How many passages the reader sees.  The ladder above k=5 buys almost
+    # nothing on this corpus and costs candidates linearly, so the reader reads
+    # 5 while retrieval is still *reported* at 10.
+    reader_top_k: int = 5
+    # Training-set size.  Every answerable train question yields ~300-600
+    # candidates, so the full 11,912 would be ~4M rows for a model that
+    # converges on a fraction of that.  Capped, and the cap is a hyperparameter
+    # in this file rather than a number buried in a script.
+    reader_train_questions: int = 3_000
+    reader_eval_questions: int = 800
+    # Negatives sampled per question during training: keeping all of them makes
+    # the positive class 0.2% and the softmax indifferent.
+    reader_negatives_per_question: int = 40
+    reader_ensemble_size: int = 5      # S5's bagged rankers
 
     # ---- verification (T11) ----------------------------------------------
     conformal_alpha: float = 0.10
     conformal_delta: float = 0.10
     contrast_set_size: int = 500
     banglaverify_verify_sample: int = 300
+    # 12,000 > the 11,912 train questions, i.e. all of them.  PLAN.md §10.3
+    # sizes each BanglaVerify label at ~12k items and that needs the whole
+    # split; the cap exists only so a quick run can shrink it.
+    banglaverify_max_questions: int = 12_000
+    verify_eval_questions: int = 800
+    # val is split into a fusion/calibration half and a conformal-calibration
+    # half.  The conformal bound is only valid on data the threshold search has
+    # not seen, so the split is structural, not a convenience.
+    conformal_calibration_frac: float = 0.5
+    correctness_threshold: float = 0.60   # token-F1 above which an answer counts as correct
 
     # ---- evaluation -------------------------------------------------------
     bootstrap_resamples: int = 1_000

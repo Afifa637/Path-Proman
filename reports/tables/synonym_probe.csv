@@ -1,0 +1,4 @@
+subset,note,n,tp,fp,fn,tn,precision,recall,f1,accuracy,config_hash,seed
+all,the headline: precision is the number that matters,71,30,0,12,29,1.0,0.7143,0.8333,0.831,773e1b820203,1337
+in_lexicon,recall is 1.0 by construction — read precision only,51,30,0,0,21,1.0,1.0,1.0,1.0,773e1b820203,1337
+unseen_pairs,"coverage bound: unreachable by construction, and the gap Tier B (X3) must close",20,0,0,12,8,1.0,0.0,0.0,0.4,773e1b820203,1337

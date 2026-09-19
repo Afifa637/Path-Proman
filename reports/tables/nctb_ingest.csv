@@ -1,0 +1,3 @@
+source,chapter_files,records_read,kept,grade_filtered,filtered_short_or_nonbengali,subjects,has_citation_metadata,config_hash,seed
+nctb_schooltext,1535,58872,43359,7074,8439,32,True,773e1b820203,1337
+bangla_textbook,0,41458,40000,0,1458,0,False,773e1b820203,1337

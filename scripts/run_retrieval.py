@@ -67,14 +67,59 @@ def arms(passages, k1: float, b: float):
     return [bm25, word, char, hybrid_bc, hybrid, qe]
 
 
+def control(size: int, val: list[dict]) -> list[dict]:
+    """The length-artefact control: gold + Wikipedia only, no NCTB.
+
+    The corpus audit measures that passage length separates gold from NCTB
+    passages at AUC ~0.97, while the length-matched Wikipedia distractors sit
+    at chance.  NCTB text is short because we keep its own chunking — that
+    chunking is what carries the chapter metadata VC-2 cites — so the artefact
+    cannot be removed without destroying the citation unit.
+
+    What *can* be done is measure what it is worth.  This arm re-runs BM25
+    over the same index with the NCTB passages removed, so the headline number
+    can be read beside a retrieval task whose distractors are known to be
+    distributionally matched.  A large gap means the headline is partly
+    measuring our own index construction, and the report says so.
+    """
+    from bnqa.retrieval.index import prepare as _prepare
+
+    passages = _prepare(size, verbose=False)
+    subset = [p for p in passages if p.get("source") != "nctb_schooltext"]
+    print(f"  control index: {len(subset):,d} passages (gold + wiki only, "
+          f"{len(passages) - len(subset):,d} NCTB removed)")
+
+    rows: list[dict] = []
+    for label, pool in (("full", passages), ("gold+wiki", subset)):
+        r = BM25Retriever(CFG.bm25_k1, CFG.bm25_b).build(pool)
+        m = evaluate_retriever(r, val, with_latency=False)
+        m.update({"arm": f"bm25/{label}", "index_size": size,
+                  "passages": len(pool), "bm25_k1": CFG.bm25_k1, "bm25_b": CFG.bm25_b})
+        rows.append(m)
+        print(f"    {m['arm']:18s} R@5={m['recall@5']:.4f}  MRR={m['mrr@10']:.4f}")
+    if len(rows) == 2:
+        delta = rows[1]["recall@5"] - rows[0]["recall@5"]
+        print(f"    removing the distributionally-distinct NCTB distractors moves "
+              f"Recall@5 by {delta:+.4f}")
+    return rows
+
+
 def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--size", type=int, default=None, help="one index size only")
     ap.add_argument("--queries", type=int, default=None, help="cap val queries (quick runs)")
     ap.add_argument("--no-tune", action="store_true")
+    ap.add_argument("--control-only", action="store_true",
+                    help="run only the length-artefact control arm")
     args = ap.parse_args()
 
     set_seed()
+    if args.control_only:
+        val = load_queries("val", limit=args.queries)
+        rows = control(args.size or CFG.headline_index, val)
+        save_table("retrieval_length_control", rows)
+        log_result("t7_retrieval", "length_control", {"rows": rows})
+        return
     sizes = [args.size] if args.size else sorted(CFG.index_sizes)
     val = load_queries("val", limit=args.queries)
     print(f"T5/T7  sparse retrieval - {len(val):,d} answerable val questions\n")
@@ -96,17 +141,14 @@ def main() -> None:
             m["split"] = "val"
             m["bm25_k1"] = k1
             m["bm25_b"] = b
-            if isinstance(r, ExpandedQuery):
-                # Coverage is the number that explains this row.  The T6b lexicon
-                # is curriculum-domain and hand-authored; BanglaRQA questions are
-                # Wikipedia-domain, so expansion can only fire where the two
-                # vocabularies overlap.  Reporting the overlap turns "query
-                # expansion did nothing" into a measured explanation, and sets the
-                # baseline Tier B's induced synonyms (X3) have to beat.
-                m["expanded_queries"] = r.expanded_queries
-                m["expanded_pct"] = round(100 * r.expanded_queries / max(len(val), 1), 2)
-                m["added_terms_per_expanded_query"] = round(
-                    r.added_terms / max(r.expanded_queries, 1), 2)
+            # Query-expansion coverage arrives via the arm's own counters
+            # (evaluate_retriever snapshots them).  It is the number that
+            # explains this row: the T6b lexicon is curriculum-domain and
+            # hand-authored, BanglaRQA questions are Wikipedia-domain, so
+            # expansion can only fire where the two vocabularies overlap.
+            # Reporting that overlap turns "query expansion did nothing" into a
+            # measured explanation, and sets the baseline Tier B's induced
+            # synonyms (X3) have to beat.
             table.append(m)
             print(f"  {m['retriever']:22s} R@1={m['recall@1']:.3f} R@5={m['recall@5']:.3f} "
                   f"R@10={m['recall@10']:.3f} MRR={m['mrr@10']:.3f} nDCG={m['ndcg@10']:.3f} "

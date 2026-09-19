@@ -6,8 +6,12 @@ arms) import those libraries lazily and are never required by Tier A.
 """
 
 from .config import CFG, config_hash  # noqa: F401
+from .offline import install as install_offline_guard  # noqa: F401
 from .utils import force_utf8_stdout, set_seed  # noqa: F401
 
 __version__ = "0.4.0"
 
 force_utf8_stdout()
+# VC-6: a no-op unless BNQA_OFFLINE=1, so importing bnqa in an air-gapped demo
+# is enough to make any outbound connection raise instead of hang.
+install_offline_guard()

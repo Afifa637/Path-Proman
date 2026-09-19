@@ -136,6 +136,43 @@ def log_result(section: str, key: str, payload: dict) -> None:
     write_json(RESULTS_JSON, results)
 
 
+def stale_results(current: str | None = None) -> dict[str, list[str]]:
+    """Rows in ``results.json`` that were written by a different configuration.
+
+    VC-12 says every number in the report traces back to the configuration
+    that produced it.  A row left over from an earlier config hash still
+    *looks* like a current result, and is the easiest way for a stale number
+    to survive into a report — so it is found by name rather than trusted to
+    be noticed.
+    """
+    if not RESULTS_JSON.exists():
+        return {}
+    current = current or config_hash()
+    results = read_json(RESULTS_JSON)
+    out: dict[str, list[str]] = {}
+    for section, rows in results.items():
+        stale = [k for k, v in rows.items()
+                 if isinstance(v, dict) and v.get("config_hash") != current]
+        if stale:
+            out[section] = stale
+    return out
+
+
+def prune_results(current: str | None = None) -> dict[str, list[str]]:
+    """Drop stale rows.  Returns what was removed, for the caller to report."""
+    stale = stale_results(current)
+    if not stale:
+        return {}
+    results = read_json(RESULTS_JSON)
+    for section, keys in stale.items():
+        for k in keys:
+            results[section].pop(k, None)
+        if not results[section]:
+            results.pop(section, None)
+    write_json(RESULTS_JSON, results)
+    return stale
+
+
 def save_table(name: str, rows: list[dict]) -> Path:
     """Write reports/tables/<name>.csv with the config hash on every row."""
     import pandas as pd

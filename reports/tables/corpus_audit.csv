@@ -1,0 +1,4 @@
+source,passages,chars_median,chars_p10,chars_p90,tokens_median,tokens_p90,bengali_ratio_mean,bengali_ratio_min,sample_checked,with_citation_metadata,config_hash,seed
+gold,3000,1377,666,2456,203,360,0.9595,0.8879,200,0,773e1b820203,1337
+nctb_schooltext,20000,353,190,570,57,93,0.9335,0.6089,200,20000,773e1b820203,1337
+wiki,27000,1288,667,2000,189,298,0.9394,0.603,200,0,773e1b820203,1337
