@@ -34,8 +34,8 @@ from bnqa.config import (CFG, MODELS, PASSAGES, RECEIPTS, ROOT, SOURCES_CSV,  # 
 from bnqa.eval.qa_metrics import token_f1  # noqa: E402
 from bnqa.eval.retrieval_metrics import load_queries  # noqa: E402
 from bnqa.pipeline import BanglaQA  # noqa: E402
-from bnqa.utils import (load_jsonl, log_result, read_json, save_table,  # noqa: E402
-                        set_seed, sha256_file)
+from bnqa.utils import (load_jsonl, log_result, prune_results, read_json,  # noqa: E402
+                        save_table, set_seed, sha256_file)
 from bnqa.verify.receipt import check_all  # noqa: E402
 
 
@@ -100,6 +100,15 @@ def main() -> None:
                  and abs(a.confidence - b.confidence) < 1e-12)
     print(f"  determinism (VC-8): same question twice -> "
           f"{'byte-identical ✅' if identical else 'DIVERGED ❌'}")
+
+    # ---- VC-12: no stale numbers survive into the report -----------------
+    dropped = prune_results()
+    if dropped:
+        print("  VC-12: dropped rows written by an earlier configuration —")
+        for section, keys in dropped.items():
+            print(f"    {section}: {', '.join(keys)}")
+    else:
+        print("  VC-12: every row in results.json carries the current config hash")
 
     # ---- VC-10: the model card ------------------------------------------
     card = model_card(receipts, identical, args)

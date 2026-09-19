@@ -107,3 +107,31 @@ def test_uninstall_restores_the_real_socket():
     assert socket.socket is not original
     uninstall()
     assert socket.socket is original
+
+
+# --------------------------------------------------------------------------- #
+# VC-12 no hand-entered, and no stale, numbers                                 #
+# --------------------------------------------------------------------------- #
+
+
+def test_stale_results_detector_finds_a_foreign_hash(tmp_path, monkeypatch):
+    """A row from an earlier configuration must be findable by name.
+
+    It is the easiest way for a stale number to survive into a report: it
+    still looks current, because nothing about it says otherwise.
+    """
+    import bnqa.utils as utils
+
+    fake = tmp_path / "results.json"
+    utils.write_json(fake, {
+        "t7_retrieval": {"val": {"recall@5": 0.9, "config_hash": "deadbeef0000"}},
+        "t1_x": {"ingest": {"n": 1, "config_hash": config_hash()}},
+    })
+    monkeypatch.setattr(utils, "RESULTS_JSON", fake)
+
+    stale = utils.stale_results()
+    assert stale == {"t7_retrieval": ["val"]}
+
+    assert utils.prune_results() == {"t7_retrieval": ["val"]}
+    assert utils.stale_results() == {}
+    assert "t1_x" in utils.read_json(fake)
